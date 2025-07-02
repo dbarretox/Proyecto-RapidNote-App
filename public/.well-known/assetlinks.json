@@ -1,0 +1,12 @@
+[
+    {
+        "relation": ["delegate_permission/common.handle_all_urls"],
+        "target": {
+            "namespace": "android_app",
+            "package_name": "com.rapinote.app",
+            "sha256_cert_fingerprints": [
+                "F1:06:8F:08:0C:AC:BA:51:41:A7:1A:8E:C0:E8:3C:78:A6:3F:45:9E:31:2B:AC:55:E2:11:AF:01:92:2B:F5:C7"
+            ]
+        }
+    }
+]

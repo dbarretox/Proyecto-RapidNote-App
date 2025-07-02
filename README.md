@@ -1,74 +1,59 @@
-<<<<<<< HEAD
-# Proyecto-RapidNote-App
-App de notas rapidas
-=======
-# React + TypeScript + Vite
+# 🚀 RapidNote
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**RapidNote** es una aplicación web minimalista para tomar notas rápidas. Desarrollada con **React**, **TypeScript** y **TailwindCSS**, permite crear, eliminar, editar y marcar notas como favoritas. Las notas se guardan en **localStorage**, lo que permite su uso completamente offline.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## ✨ Características
 
-## Expanding the ESLint configuration
+- 📝 Crear y eliminar notas
+- 💾 Guardado automático en el navegador
+- 🌟 Marcar notas como favoritas
+- 🔍 Ordenar por fecha, título o favoritas
+- 📱 Responsive y rápida
+- ⚙️ Basada en PWA (instalable en el escritorio o móvil)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🧪 Tecnologías
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- localStorage API
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+---
+
+## 🚀 Instalación
+
+Clona el repositorio y ejecuta localmente:
+
+```bash
+git clone git@github.com:dbarretox/Proyecto-RapidNote-App.git
+cd Proyecto-RapidNote-App
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Luego abre `http://localhost:5173` en tu navegador.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+---
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 📦 Build de producción
+
+```bash
+npm run build
 ```
->>>>>>> bcbfc9d (Primer commit: Proyecto RapidNote)
+
+---
+
+## 📄 Licencia
+
+MIT — Libre para uso personal o comercial.
+
+---
+
+## ✍️ Autor
+
+Desarrollado por [Daniel Barreto](https://dbarreto.net) – [@dbarretox](https://github.com/dbarretox)
