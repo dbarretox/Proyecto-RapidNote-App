@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion"
 import type { Note, SelectionMode } from "../types"
 import NoteCard from "./NoteCard"
-import { Trash2, X, CircleCheckBig } from "lucide-react"
+import { Trash2, X, CircleCheck } from "lucide-react"
 
 type Props = {
     notes: Note[]
@@ -57,7 +57,7 @@ export default function NoteList({
                     >
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                                <CircleCheckBig className="w-5 h-5 text-blue-600" />
+                                <CircleCheck className="w-5 h-5 text-blue-600" />
                                 <span className="font-medium text-blue-800">
                                     {selectedCount === 0 
                                         ? 'Seleccionar notas' 
@@ -77,7 +77,7 @@ export default function NoteList({
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
                                 >
-                                    <CircleCheckBig className="w-4 h-4" />
+                                    <CircleCheck className="w-4 h-4" />
                                     {allSelected ? 'Deseleccionar' : 'Seleccionar todas'}
                                 </motion.button>
 

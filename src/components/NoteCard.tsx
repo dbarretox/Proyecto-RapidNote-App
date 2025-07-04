@@ -1,5 +1,5 @@
 import type { Note, SelectionMode } from "../types"
-import { Star, StarOff, Trash2, Pencil, MoreHorizontal, CheckCircle, Circle, ChevronDown } from "lucide-react"
+import { Star, StarOff, Trash2, Pencil, MoreHorizontal, CircleCheckBig, Circle, ChevronDown } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useState } from "react"
 
@@ -73,7 +73,7 @@ export default function NoteCard({ note, onDelete, onEdit, onToggleFavorite, sel
                             whileTap={{ scale: 0.9 }}
                         >
                             {isSelected ? (
-                                <CheckCircle className="w-6 h-6 text-blue-600" fill="currentColor" />
+                                <CircleCheckBig className="w-6 h-6 text-blue-600" />
                             ) : (
                                 <Circle className="w-6 h-6 text-gray-400" />
                             )}
