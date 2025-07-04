@@ -50,7 +50,7 @@ export default function NoteForm({ title, setTitle, content, setContent, editing
     const isDisabled = !title.trim() && !content.trim()
 
     return (
-        <motion.div 
+        <motion.div
             className="space-y-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -105,11 +105,10 @@ export default function NoteForm({ title, setTitle, content, setContent, editing
             <motion.button
                 onClick={handleSave}
                 disabled={isDisabled}
-                className={`w-full py-4 rounded-xl font-semibold text-base flex items-center justify-center gap-3 transition-all ${
-                    isDisabled
+                className={`w-full py-4 rounded-xl font-semibold text-base flex items-center justify-center gap-3 transition-all ${isDisabled
                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                         : 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 shadow-lg hover:shadow-xl'
-                }`}
+                    }`}
                 whileHover={!isDisabled ? { scale: 1.02 } : {}}
                 whileTap={!isDisabled ? { scale: 0.98 } : {}}
                 initial={{ opacity: 0, y: 10 }}
@@ -130,7 +129,7 @@ export default function NoteForm({ title, setTitle, content, setContent, editing
             </motion.button>
 
             {/* Ayuda de teclado */}
-            <motion.div 
+            <motion.div
                 className="text-center text-xs text-gray-400"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
