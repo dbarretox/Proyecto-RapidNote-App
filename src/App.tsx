@@ -1,16 +1,18 @@
 import { useState, useEffect } from "react"
-import type { Note, SelectionMode } from "./types"
-import { NoteList, NoteForm } from "./components/notes"
-import { SearchBar, SortControls } from "./components/controls"
+import type { Note, SelectionMode, Category } from "@/types"
+import { NoteList, NoteForm } from "@/components/notes"
+import { SearchBar, SortControls } from "@/components/controls"
 import { motion } from "framer-motion"
-import { Star, Search, Edit3, FileText } from "lucide-react"
-import { Button } from "./components/ui"
-import { Header, BottomNav } from "./components/layout"
+import { Star, Search, Edit3, FileText, Tag } from "lucide-react"
+import { Button } from "@/components/ui"
+import { Header, BottomNav } from "@/components/layout"
+import { CategorySelector, CategoryForm, CategoryList } from "@/components/categories"
+
 
 function App() {
 
   // Estados de la aplicación
-  const [activeTab, setActiveTab] = useState<'notes' | 'search' | 'add'>('notes')
+  const [activeTab, setActiveTab] = useState<'notes' | 'search' | 'add' | 'categories'>('notes')
   const [notes, setNotes] = useState<Note[]>([])
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
@@ -20,6 +22,10 @@ function App() {
   const [sortBy, setSortBy] = useState<"date" | "favorite" | "updated">("date")
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
   const [showOnlyFavorites, setShowOnlyFavorites] = useState(false)
+  const [categories, setCategories] = useState<Category[]>([])
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null)
+  const [showCategoryForm, setShowCategoryForm] = useState(false)
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null)
 
   // Estado para selección múltiple
   const [selectionMode, setSelectionMode] = useState<SelectionMode>({
@@ -44,6 +50,21 @@ function App() {
       }
     }
 
+    const storedCategories = localStorage.getItem("categories")
+    if (storedCategories) {
+      try {
+        const parsed = JSON.parse(storedCategories)
+        setCategories(Array.isArray(parsed) ? parsed : [])
+      } catch {
+        console.error("Error al parsear categories desde localStorage")
+      }
+    }
+
+    const storedSelectedCategory = localStorage.getItem("selectedCategoryId")
+    if (storedSelectedCategory && storedSelectedCategory !== "null") {
+      setSelectedCategoryId(storedSelectedCategory)
+    }
+
     const storedShowFavs = localStorage.getItem("showOnlyFavorites")
     if (storedShowFavs === "true") {
       setShowOnlyFavorites(true)
@@ -63,6 +84,16 @@ function App() {
     localStorage.setItem("showOnlyFavorites", String(showOnlyFavorites))
   }, [showOnlyFavorites])
 
+  useEffect(() => {
+    if (isReady) {
+      localStorage.setItem("categories", JSON.stringify(categories))
+    }
+  }, [categories, isReady])
+
+  useEffect(() => {
+    localStorage.setItem("selectedCategoryId", selectedCategoryId || "null")
+  }, [selectedCategoryId])
+
   // Funciones de notas (guardar y editar)
   const handleSaveNote = () => {
     if (!title.trim() && !content.trim()) return
@@ -71,7 +102,7 @@ function App() {
 
     if (editingId) {
       setNotes(notes.map(note =>
-        note.id === editingId ? { ...note, title, content, updatedAt: now } : note
+        note.id === editingId ? { ...note, title, content, categoryId: selectedCategoryId, updatedAt: now } : note
       ))
       setEditingId(null)
     } else {
@@ -79,6 +110,7 @@ function App() {
         id: now.toString(),
         title,
         content,
+        categoryId: selectedCategoryId,
         isFavorite: false,
         createdAt: now,
         updatedAt: now
@@ -159,7 +191,13 @@ function App() {
       note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       note.content.toLowerCase().includes(searchTerm.toLowerCase())
 
-    return showOnlyFavorites ? note.isFavorite && matchesSearch : matchesSearch
+    const matchesCategory = selectedCategoryId
+      ? note.categoryId === selectedCategoryId
+      : true
+
+    const matchesFavorites = showOnlyFavorites ? note.isFavorite : true
+
+    return matchesSearch && matchesCategory && matchesFavorites
   })
 
   const sortedNotes = [...filteredNotes].sort((a, b) => {
@@ -181,9 +219,45 @@ function App() {
     return sortOrder === "asc" ? dateA - dateB : dateB - dateA
   })
 
+  // Funciones de categorías
+  const handleSaveCategory = (categoryData: Omit<Category, 'id' | 'createdAt'>) => {
+    const now = Date.now()
+
+    if (editingCategory) {
+      setCategories(categories.map(cat =>
+        cat.id === editingCategory.id
+          ? { ...cat, ...categoryData }
+          : cat
+      ))
+      setEditingCategory(null)
+    } else {
+      const newCategory: Category = {
+        id: now.toString(),
+        ...categoryData,
+        createdAt: now
+      }
+      setCategories([...categories, newCategory])
+    }
+
+    setShowCategoryForm(false)
+  }
+
+  const deleteCategory = (categoryId: string) => {
+    setCategories(categories.filter(cat => cat.id !== categoryId))
+
+    if (selectedCategoryId === categoryId) {
+      setSelectedCategoryId(null)
+    }
+  }
+
+  const startEditCategory = (category: Category) => {
+    setEditingCategory(category)
+    setShowCategoryForm(true)
+  }
+
   // Manejo de long press
   useEffect(() => {
-    let pressTimer: number
+    let pressTimer: ReturnType<typeof setTimeout>
     let targetNoteId: string | null = null
 
     const handleTouchStart = (e: TouchEvent) => {
@@ -246,34 +320,42 @@ function App() {
               transition={{ duration: 0.3 }}
             >
               {!selectionMode.isActive && (
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center bg-gray-100 rounded-lg p-1">
-                    <Button
-                      variant="tab"
-                      isActive={!showOnlyFavorites}
-                      onClick={() => setShowOnlyFavorites(false)}
-                      className="px-3 py-2 text-sm"
-                    >
-                      <FileText className="w-4 h-4" />
-                      <span>Todas</span>
-                    </Button>
+                <div className="space-y-4 mb-4">  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center bg-gray-100 rounded-lg p-1">
+                      <Button
+                        variant="tab"
+                        isActive={!showOnlyFavorites}
+                        onClick={() => setShowOnlyFavorites(false)}
+                        className="text-sm"
+                      >
+                        <FileText className="w-4 h-4" />
+                        <span>Todas</span>
+                      </Button>
 
-                    <Button
-                      variant="tab"
-                      isActive={showOnlyFavorites}
-                      onClick={() => setShowOnlyFavorites(true)}
-                      className="px-3 py-2 text-sm"
-                    >
-                      <Star className={`w-4 h-4 ${showOnlyFavorites ? 'fill-current' : ''}`} />
-                      <span>Favoritas</span>
-                    </Button>
+                      <Button
+                        variant="tab"
+                        isActive={showOnlyFavorites}
+                        onClick={() => setShowOnlyFavorites(true)}
+                        className="text-sm"
+                      >
+                        <Star className={`w-4 h-4 ${showOnlyFavorites ? 'fill-current' : ''}`} />
+                        <span>Favoritas</span>
+                      </Button>
+                    </div>
+
+                    <SortControls
+                      sortBy={sortBy}
+                      setSortBy={setSortBy}
+                      sortOrder={sortOrder}
+                      setSortOrder={setSortOrder}
+                    />
                   </div>
 
-                  <SortControls
-                    sortBy={sortBy}
-                    setSortBy={setSortBy}
-                    sortOrder={sortOrder}
-                    setSortOrder={setSortOrder}
+                  <CategorySelector
+                    categories={categories}
+                    selectedCategoryId={selectedCategoryId}
+                    onCategorySelect={setSelectedCategoryId}
                   />
                 </div>
               )}
@@ -282,6 +364,7 @@ function App() {
                 notes={sortedNotes}
                 totalNotes={notes.length}
                 searchTerm={searchTerm}
+                categories={categories}
                 onDelete={deleteNote}
                 onEdit={startEdit}
                 onToggleFavorite={toggleFavorite}
@@ -331,6 +414,7 @@ function App() {
                     notes={sortedNotes}
                     totalNotes={notes.length}
                     searchTerm={searchTerm}
+                    categories={categories}
                     onDelete={deleteNote}
                     onEdit={startEdit}
                     onToggleFavorite={toggleFavorite}
@@ -369,6 +453,12 @@ function App() {
                 setTitle={setTitle}
                 setContent={setContent}
                 editingId={editingId}
+                categories={categories}
+                selectedCategoryId={editingId 
+                  ? notes.find(n => n.id === editingId)?.categoryId || null
+                  : selectedCategoryId
+                }
+                onCategoryChange={setSelectedCategoryId}
                 onSave={handleSaveNote}
               />
 
@@ -385,6 +475,69 @@ function App() {
                 >
                   Cancelar edición
                 </motion.button>
+              )}
+            </motion.div>
+          )}
+
+          {/* Tab: Gestión de categorías */}
+          {activeTab === 'categories' && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Categorías
+                </h2>
+                <motion.button
+                  onClick={() => setShowCategoryForm(true)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  + Nueva
+                </motion.button>
+              </div>
+              {showCategoryForm && (
+                <div className="mb-6">
+                  <CategoryForm
+                    onSave={handleSaveCategory}
+                    onCancel={() => {
+                      setShowCategoryForm(false)
+                      setEditingCategory(null)
+                    }}
+                    editingCategory={editingCategory}
+                  />
+                </div>
+              )}
+
+              <CategoryList
+                categories={categories}
+                onEdit={startEditCategory}
+                onDelete={deleteCategory}
+              />
+
+              {categories.length === 0 && !showCategoryForm && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="text-center py-12"
+                >
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Tag className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Sin categorías</h3>
+                  <p className="text-gray-500 mb-6">Crea tu primera categoría para organizar tus notas</p>
+                  <motion.button
+                    onClick={() => setShowCategoryForm(true)}
+                    className="px-6 py-3 bg-blue-600 text-white rounded-xl font-medium shadow-lg"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    Crear categoría
+                  </motion.button>
+                </motion.div>
               )}
             </motion.div>
           )}

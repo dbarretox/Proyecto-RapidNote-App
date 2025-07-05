@@ -1,4 +1,4 @@
-import type { Note, SelectionMode } from "../../types"
+import type { Note, SelectionMode, Category } from "@/types"
 import { Star, StarOff, Trash2, Pencil, MoreHorizontal, CircleCheckBig, Circle, ChevronDown } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useState } from "react"
@@ -10,9 +10,18 @@ type Props = {
     onToggleFavorite: (id: string) => void
     selectionMode: SelectionMode
     onToggleSelection: (id: string) => void
+    categories: Category[]
 }
 
-export default function NoteCard({ note, onDelete, onEdit, onToggleFavorite, selectionMode, onToggleSelection }: Props) {
+export default function NoteCard({ 
+    note, 
+    onDelete, 
+    onEdit, 
+    onToggleFavorite, 
+    selectionMode, 
+    onToggleSelection,
+    categories
+}: Props) {
     const [showActions, setShowActions] = useState(false)
     const [isExpanded, setIsExpanded] = useState(false)
 
@@ -40,6 +49,10 @@ export default function NoteCard({ note, onDelete, onEdit, onToggleFavorite, sel
             ...(isThisYear ? {} : { year: 'numeric' })
         })
     }
+
+    const noteCategory = note.categoryId
+        ? categories.find(cat => cat.id === note.categoryId)
+        : null
 
     return (
         <motion.div
@@ -113,6 +126,15 @@ export default function NoteCard({ note, onDelete, onEdit, onToggleFavorite, sel
                                     <span>•</span>
                                     <span>editado {formatDate(note.updatedAt)}</span>
                                 </>
+                            )}
+                            {noteCategory && (
+                                <div className="flex items-center gap-1">
+                                    <div
+                                        className="w-2 h-2 rounded-full"
+                                        style={{ backgroundColor: noteCategory.color }}
+                                    />
+                                    <span>{noteCategory.name}</span>
+                                </div>
                             )}
                         </div>
                     </div>
@@ -192,16 +214,6 @@ export default function NoteCard({ note, onDelete, onEdit, onToggleFavorite, sel
                                 <Trash2 className="w-4 h-4" />
                                 Eliminar
                             </motion.button>
-
-                            {note.isFavorite && (
-                                <motion.div
-                                    initial={{ scale: 0, opacity: 0 }}
-                                    animate={{ scale: 1, opacity: 1 }}
-                                    className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-medium"
-                                >
-                                    ⭐ Favorita
-                                </motion.div>
-                            )}
                         </div>
 
                         {/* Menú de más opciones */}

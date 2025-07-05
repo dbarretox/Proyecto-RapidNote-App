@@ -1,17 +1,17 @@
 import { motion } from 'framer-motion'
-import { Menu, Search, Plus } from 'lucide-react'
-import type { SelectionMode } from '../../types'
+import { Menu, Search, Plus, Tag } from 'lucide-react'
+import type { SelectionMode } from '@/types'
 
 interface BottomNavProps {
-    activeTab: 'notes' | 'search' | 'add'
+    activeTab: 'notes' | 'search' | 'add' | 'categories'
     editingId: string | null
     selectionMode: SelectionMode
-    onTabChange: (tab: 'notes' | 'search' | 'add') => void
+    onTabChange: (tab: 'notes' | 'search' | 'add' | 'categories') => void
     onCancelEdit: () => void
     onCancelSelection: () => void
 }
 
-export default function BottomNavProps({
+export default function BottomNav({
     activeTab,
     editingId,
     selectionMode,
@@ -19,7 +19,7 @@ export default function BottomNavProps({
     onCancelEdit,
     onCancelSelection
 }: BottomNavProps) {
-    const handlleTabClick = (tab: 'notes' | 'search' | 'add') => {
+    const handleTabClick = (tab: 'notes' | 'search' | 'add' | 'categories') => {
         if (selectionMode.isActive) {
             onCancelSelection()
         }
@@ -36,7 +36,7 @@ export default function BottomNavProps({
             <div className="max-w-lg mx-auto">
                 <div className="flex justify-around items-end">
                     <motion.button
-                        onClick={() => handlleTabClick('notes')}
+                        onClick={() => handleTabClick('notes')}
                         className={`flex flex-col items-center py-2 px-4 rounded-lg transition-colors ${activeTab === 'notes' ? 'text-blue-600 bg-blue-50' : 'text-gray-500'
                             }`}
                     >
@@ -44,7 +44,7 @@ export default function BottomNavProps({
                         <span className="text-xs font-medium">Notas</span>
                     </motion.button>
                     <motion.button
-                        onClick={() => handlleTabClick('search')}
+                        onClick={() => handleTabClick('search')}
                         className={`flex flex-col items-center py-2 px-4 rounded-lg transition-colors ${activeTab === 'search' ? 'text-blue-600 bg-blue-50' : 'text-gray-500'
                             }`}
                     >
@@ -52,7 +52,15 @@ export default function BottomNavProps({
                         <span className="text-xs font-medium">Buscar</span>
                     </motion.button>
                     <motion.button
-                        onClick={() => handlleTabClick('add')}
+                        onClick={() => handleTabClick('categories')}
+                        className={`flex flex-col items-center py-2 px-4 rounded-lg transition-colors ${activeTab === 'categories' ? 'text-blue-600 bg-blue-50' : 'text-gray-500'
+                            }`}
+                    >
+                        <Tag className="w-6 h-6 mb-1" />
+                        <span className="text-xs font-medium">Categorías</span>
+                    </motion.button>
+                    <motion.button
+                        onClick={() => handleTabClick('add')}
                         className="flex flex-col items-center"
                     >
                         <div className={`relative w-10 h-10 rounded-xl flex items-center justify-center ${activeTab === 'add'

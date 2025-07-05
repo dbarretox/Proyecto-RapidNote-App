@@ -1,6 +1,8 @@
+import type { Category } from "@/types"
 import { motion } from "framer-motion"
 import { Save, Plus, Type, FileText } from "lucide-react"
 import { useRef, useEffect } from "react"
+import { CategorySelector } from "../categories"
 
 type Props = {
     title: string
@@ -8,10 +10,23 @@ type Props = {
     content: string
     setContent: (value: string) => void
     editingId: string | null
+    categories: Category[]
+    selectedCategoryId: string | null
+    onCategoryChange: (categoryId: string | null) => void
     onSave: () => void
 }
 
-export default function NoteForm({ title, setTitle, content, setContent, editingId, onSave }: Props) {
+export default function NoteForm({ 
+    title, 
+    setTitle, 
+    content, 
+    setContent, 
+    editingId, 
+    categories,
+    selectedCategoryId,
+    onCategoryChange,
+    onSave 
+}: Props) {
     const titleRef = useRef<HTMLInputElement>(null)
     const contentRef = useRef<HTMLTextAreaElement>(null)
 
@@ -86,6 +101,18 @@ export default function NoteForm({ title, setTitle, content, setContent, editing
                     onKeyDown={handleKeyDown}
                     className="w-full pl-12 pr-4 py-4 text-base leading-relaxed border-2 border-gray-200 rounded-xl bg-white focus:border-blue-500 focus:ring-0 outline-none transition-colors placeholder-gray-400 resize-none min-h-[120px]"
                     rows={4}
+                />
+            </div>
+
+            {/* Selector de categorías */}
+            <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                    Categoría
+                </label>
+                <CategorySelector
+                    categories={categories}
+                    selectedCategoryId={selectedCategoryId}
+                    onCategorySelect={onCategoryChange}
                 />
             </div>
 

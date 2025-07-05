@@ -5,9 +5,17 @@ export interface Note {
     isFavorite: boolean
     createdAt?: number
     updatedAt?: number
+    categoryId?: string | null
 }
 
 export interface SelectionMode {
     isActive: boolean
     selectedIds: Set<string>
+}
+
+export interface Category {
+    id: string
+    name: string
+    color: string
+    createdAt: number
 }

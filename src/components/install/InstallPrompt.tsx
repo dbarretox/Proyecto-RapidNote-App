@@ -1,6 +1,6 @@
 import { motion } from "framer-motion"
 import { Smartphone } from "lucide-react"
-import { usePWAInstall } from '../hooks'
+import { usePWAInstall } from '@/hooks'
 import IOSInstructionsModal from "./IOSInstructionsModal"
 
 function InstallPrompt() {
