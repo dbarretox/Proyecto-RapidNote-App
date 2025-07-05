@@ -6,7 +6,7 @@ import type { SelectionMode } from "../../types"
 interface HeaderProps {
     notes: Array<{ id: string }>
     selectionMode: SelectionMode
-    activeTab: 'notes' | 'search' | 'add'
+    activeTab: 'notes' | 'search' | 'add' | 'categories'
     onToggleSelection: () => void
     onCancelSelection: () => void
 }
