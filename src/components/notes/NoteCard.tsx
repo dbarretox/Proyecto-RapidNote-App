@@ -192,16 +192,6 @@ export default function NoteCard({ note, onDelete, onEdit, onToggleFavorite, sel
                                 <Trash2 className="w-4 h-4" />
                                 Eliminar
                             </motion.button>
-
-                            {note.isFavorite && (
-                                <motion.div
-                                    initial={{ scale: 0, opacity: 0 }}
-                                    animate={{ scale: 1, opacity: 1 }}
-                                    className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-medium"
-                                >
-                                    ⭐ Favorita
-                                </motion.div>
-                            )}
                         </div>
 
                         {/* Menú de más opciones */}
