@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion"
-import type { Note, SelectionMode } from "../types"
+import type { Note, SelectionMode } from "../../types"
 import NoteCard from "./NoteCard"
 import { Trash2, X, CircleCheck } from "lucide-react"
 
@@ -17,12 +17,12 @@ type Props = {
     onSelectAll: () => void
 }
 
-export default function NoteList({ 
-    notes, 
-    totalNotes, 
-    searchTerm, 
-    onDelete, 
-    onEdit, 
+export default function NoteList({
+    notes,
+    totalNotes,
+    searchTerm,
+    onDelete,
+    onEdit,
     onToggleFavorite,
     selectionMode,
     onToggleSelection,
@@ -34,8 +34,8 @@ export default function NoteList({
     if (notes.length === 0) {
         return (
             <p className="text-center text-gray-500 mt-4">
-                {totalNotes === 0 
-                    ? "No hay notas guardadas" 
+                {totalNotes === 0
+                    ? "No hay notas guardadas"
                     : `No se encontraron resultados para "${searchTerm}"`}
             </p>
         )
@@ -59,8 +59,8 @@ export default function NoteList({
                             <div className="flex items-center gap-2">
                                 <CircleCheck className="w-5 h-5 text-blue-600" />
                                 <span className="font-medium text-blue-800">
-                                    {selectedCount === 0 
-                                        ? 'Seleccionar notas' 
+                                    {selectedCount === 0
+                                        ? 'Seleccionar notas'
                                         : `${selectedCount} nota${selectedCount !== 1 ? 's' : ''} seleccionada${selectedCount !== 1 ? 's' : ''}`
                                     }
                                 </span>
@@ -69,11 +69,10 @@ export default function NoteList({
                             <div className="flex items-center gap-2">
                                 <motion.button
                                     onClick={onSelectAll}
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-colors shadow-sm ${
-                                        selectedCount > 0
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-colors shadow-sm ${selectedCount > 0
                                             ? 'bg-blue-600 text-white hover:bg-blue-700'
                                             : 'bg-gray-600 text-white hover:bg-gray-700'
-                                    }`}
+                                        }`}
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
                                 >

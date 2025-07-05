@@ -1,13 +1,11 @@
 import { useState, useEffect } from "react"
 import type { Note, SelectionMode } from "./types"
-import NoteList from "./components/NoteList"
-import NoteForm from "./components/NoteForm"
-import SearchBar from "./components/SearchBar"
-import SortControls from "./components/SortControls"
+import { NoteList, NoteForm } from "./components/notes"
+import { SearchBar, SortControls } from "./components/controls"
 import { motion } from "framer-motion"
-import { InstallPrompt } from "./components/install"
-import { Star, Plus, X, Menu, Search, Edit3, FileText, CheckSquare } from "lucide-react"
+import { Star, Search, Edit3, FileText } from "lucide-react"
 import { Button } from "./components/ui"
+import { Header, BottomNav } from "./components/layout"
 
 function App() {
 
@@ -229,40 +227,13 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b border-gray-200 px-4 py-3 sticky top-0 z-40">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white text-lg">📒</span>
-            </div>
-            <div>
-              <h1 className="text-lg font-semibold text-gray-900">RapidNote</h1>
-              {notes.length > 0 && (
-                <p className="text-xs text-gray-500">
-                  {notes.length} nota{notes.length !== 1 ? 's' : ''}
-                  {selectionMode.isActive && selectionMode.selectedIds.size > 0 &&
-                    ` • ${selectionMode.selectedIds.size} seleccionada${selectionMode.selectedIds.size !== 1 ? 's' : ''}`
-                  }
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {notes.length > 0 && activeTab === 'notes' && (
-              <Button
-                variant="toggle"
-                isActive={selectionMode.isActive}
-                onClick={selectionMode.isActive ? cancelSelection : toggleSelectionMode}
-              >
-                {selectionMode.isActive ? <X className="w-5 h-5" /> : <CheckSquare className="w-5 h-5"/>}
-              </Button>
-            )}
-
-            <InstallPrompt />
-          </div>
-        </div>
-      </div>
+      <Header
+        notes={notes}
+        selectionMode={selectionMode}
+        activeTab={activeTab}
+        onToggleSelection={toggleSelectionMode}
+        onCancelSelection={cancelSelection}
+      />
 
       {/* Contenido principal */}
       <div className="flex-1 p-4 pb-20">
@@ -281,7 +252,7 @@ function App() {
                       variant="tab"
                       isActive={!showOnlyFavorites}
                       onClick={() => setShowOnlyFavorites(false)}
-                      className="px-3 py-2 text-sm flex items-center gap-2"
+                      className="px-3 py-2 text-sm"
                     >
                       <FileText className="w-4 h-4" />
                       <span>Todas</span>
@@ -291,7 +262,7 @@ function App() {
                       variant="tab"
                       isActive={showOnlyFavorites}
                       onClick={() => setShowOnlyFavorites(true)}
-                      className="px-3 py-2 text-sm flex items-center gap-2"
+                      className="px-3 py-2 text-sm"
                     >
                       <Star className={`w-4 h-4 ${showOnlyFavorites ? 'fill-current' : ''}`} />
                       <span>Favoritas</span>
@@ -421,59 +392,18 @@ function App() {
       </div>
 
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 pt-3 pb-5">
-        <div className="max-w-lg mx-auto">
-          <div className="flex justify-around items-end">
-            <motion.button
-              onClick={() => {
-                if (selectionMode.isActive) cancelSelection()
-                setActiveTab('notes')
-              }}
-              className={`flex flex-col items-center py-2 px-4 rounded-lg transition-colors ${activeTab === 'notes' ? 'text-blue-600 bg-blue-50' : 'text-gray-500'
-                }`}
-            >
-              <Menu className="w-6 h-6 mb-1" />
-              <span className="text-xs font-medium">Notas</span>
-            </motion.button>
-
-            <motion.button
-              onClick={() => {
-                if (selectionMode.isActive) cancelSelection()
-                setActiveTab('search')
-              }}
-              className={`flex flex-col items-center py-2 px-4 rounded-lg transition-colors ${activeTab === 'search' ? 'text-blue-600 bg-blue-50' : 'text-gray-500'
-                }`}
-            >
-              <Search className="w-6 h-6 mb-1" />
-              <span className="text-xs font-medium">Buscar</span>
-            </motion.button>
-
-            <motion.button
-              onClick={() => {
-                if (editingId) {
-                  setEditingId(null)
-                  setTitle("")
-                  setContent("")
-                }
-                if (selectionMode.isActive) cancelSelection()
-                setActiveTab('add')
-              }}
-              className="relative flex flex-col items-center"
-            >
-              <div className={`relative w-12 h-12 rounded-2xl flex items-center justify-center ${activeTab === 'add'
-                  ? 'bg-blue-600 shadow-lg shadow-blue-600/30'
-                  : 'bg-blue-600 shadow-md'
-                } mb-1`}>
-                <Plus className="w-6 h-6 text-white" />
-              </div>
-              <span className={`text-xs font-medium ${activeTab === 'add' ? 'text-blue-600' : 'text-gray-600'
-                }`}>
-                {editingId ? 'Editar' : 'Crear'}
-              </span>
-            </motion.button>
-          </div>
-        </div>
-      </div>
+      <BottomNav
+        activeTab={activeTab}
+        editingId={editingId}
+        selectionMode={selectionMode}
+        onTabChange={setActiveTab}
+        onCancelEdit={() => {
+          setEditingId(null)
+          setTitle("")
+          setContent("")
+        }}
+        onCancelSelection={cancelSelection}
+      />
     </div>
   )
 }

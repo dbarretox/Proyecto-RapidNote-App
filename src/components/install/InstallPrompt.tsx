@@ -36,7 +36,7 @@ function InstallPrompt() {
         <Smartphone className="w-4 h-4" />
       </motion.button>
 
-      <IOSInstructionsModal 
+      <IOSInstructionsModal
         isOpen={showIOSInstructions}
         onClose={hideIOSModal}
       />

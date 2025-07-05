@@ -11,12 +11,12 @@ export interface UsePWAInstallReturn {
   isInstallable: boolean
   isInstalled: boolean
   showIOSInstructions: boolean
-  
+
   // Acciones
   installApp: () => Promise<void>
   showIOSModal: () => void
   hideIOSModal: () => void
-  
+
   // Info del dispositivo
   isIOS: boolean
   isSafari: boolean
@@ -44,7 +44,7 @@ export function usePWAInstall(): UsePWAInstallReturn {
 
     checkIfInstalled()
     window.addEventListener('appinstalled', () => setIsInstalled(true))
-    
+
     return () => {
       window.removeEventListener('appinstalled', () => setIsInstalled(true))
     }
@@ -90,12 +90,12 @@ export function usePWAInstall(): UsePWAInstallReturn {
     isInstallable,
     isInstalled,
     showIOSInstructions,
-    
+
     // Acciones
     installApp,
     showIOSModal,
     hideIOSModal,
-    
+
     // Info del dispositivo
     isIOS,
     isSafari
