@@ -23,10 +23,10 @@ export default function CategoryList({
     return (
         <div className="space-y-2">
             {categories.map(category => (
-                <div key={category.id} className="flex items-center justify-between p-3 bg-white rounded-lg border">
+                <div key={category.id} className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
                     <div className="flex items-center gap-3">
                         <div
-                            className="w-4 h-4 rounded-full border"
+                            className="w-4 h-4 rounded-full border border-gray-200 shadow-sm"
                             style={{ backgroundColor: category.color }}
                         />
                         <div>

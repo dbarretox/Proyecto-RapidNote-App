@@ -327,7 +327,7 @@ function App() {
                         variant="tab"
                         isActive={!showOnlyFavorites}
                         onClick={() => setShowOnlyFavorites(false)}
-                        className="px-3 py-2 text-sm"
+                        className="text-sm"
                       >
                         <FileText className="w-4 h-4" />
                         <span>Todas</span>
@@ -337,7 +337,7 @@ function App() {
                         variant="tab"
                         isActive={showOnlyFavorites}
                         onClick={() => setShowOnlyFavorites(true)}
-                        className="px-3 py-2 text-sm"
+                        className="text-sm"
                       >
                         <Star className={`w-4 h-4 ${showOnlyFavorites ? 'fill-current' : ''}`} />
                         <span>Favoritas</span>
@@ -364,6 +364,7 @@ function App() {
                 notes={sortedNotes}
                 totalNotes={notes.length}
                 searchTerm={searchTerm}
+                categories={categories}
                 onDelete={deleteNote}
                 onEdit={startEdit}
                 onToggleFavorite={toggleFavorite}
@@ -413,6 +414,7 @@ function App() {
                     notes={sortedNotes}
                     totalNotes={notes.length}
                     searchTerm={searchTerm}
+                    categories={categories}
                     onDelete={deleteNote}
                     onEdit={startEdit}
                     onToggleFavorite={toggleFavorite}

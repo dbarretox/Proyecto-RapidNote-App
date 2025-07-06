@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion"
-import type { Note, SelectionMode } from "../../types"
+import type { Category, Note, SelectionMode } from "../../types"
 import NoteCard from "./NoteCard"
 import { Trash2, X, CircleCheck } from "lucide-react"
 
@@ -15,6 +15,7 @@ type Props = {
     onDeleteSelected: () => void
     onCancelSelection: () => void
     onSelectAll: () => void
+    categories: Category[]
 }
 
 export default function NoteList({
@@ -28,7 +29,8 @@ export default function NoteList({
     onToggleSelection,
     onDeleteSelected,
     onCancelSelection,
-    onSelectAll
+    onSelectAll,
+    categories
 }: Props) {
     // Mensaje cuando no hay notas
     if (notes.length === 0) {
@@ -131,6 +133,7 @@ export default function NoteList({
                     >
                         <NoteCard
                             note={note}
+                            categories={categories}
                             onDelete={onDelete}
                             onEdit={onEdit}
                             onToggleFavorite={onToggleFavorite}
