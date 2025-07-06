@@ -67,14 +67,15 @@ export default function CategoryForm({
                 </div>
             </div>
             <div className="flex gap-2 mt-4">
+                
                 <Button
                     variant="primary"
-                    className="flex-1 justify-center disabled:opacity-50"
+                    className="flex-1 justify-center"
+                    disabled={!name.trim()}
                     onClick={() => {
-                        if(!name.trim()) return
                         onSave({ name: name.trim(), color })
                         setName('')
-                        setColor('#3B92F6')
+                        setColor('#3B82F6')
                     }}
                 >
                     <Check className="w-4 h-4" />

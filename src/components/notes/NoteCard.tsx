@@ -2,6 +2,8 @@ import type { Note, SelectionMode, Category } from "@/types"
 import { Star, StarOff, Trash2, Pencil, MoreHorizontal, CircleCheckBig, Circle, ChevronDown } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useState } from "react"
+import { isLightColor } from "@/utils"
+import { ConfirmDialog } from "@/components/ui"
 
 type Props = {
     note: Note
@@ -13,17 +15,18 @@ type Props = {
     categories: Category[]
 }
 
-export default function NoteCard({ 
-    note, 
-    onDelete, 
-    onEdit, 
-    onToggleFavorite, 
-    selectionMode, 
+export default function NoteCard({
+    note,
+    onDelete,
+    onEdit,
+    onToggleFavorite,
+    selectionMode,
     onToggleSelection,
     categories
 }: Props) {
     const [showActions, setShowActions] = useState(false)
     const [isExpanded, setIsExpanded] = useState(false)
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
     const isSelected = selectionMode.selectedIds.has(note.id)
 
@@ -57,8 +60,8 @@ export default function NoteCard({
     return (
         <motion.div
             className={`note-card-container relative rounded-xl shadow-sm border transition-all duration-200 ${note.isFavorite
-                    ? "border-yellow-200 bg-gradient-to-r from-yellow-50 to-amber-50"
-                    : "border-gray-200 bg-white hover:border-gray-300"
+                ? "border-yellow-200 bg-gradient-to-r from-yellow-50 to-amber-50"
+                : "border-gray-200 bg-white hover:border-gray-300"
                 } ${isSelected ? 'ring-2 ring-blue-500 ring-opacity-50' : ''} ${selectionMode.isActive ? 'cursor-pointer' : ''
                 }`}
             data-note-id={note.id}
@@ -128,12 +131,13 @@ export default function NoteCard({
                                 </>
                             )}
                             {noteCategory && (
-                                <div className="flex items-center gap-1">
-                                    <div
-                                        className="w-2 h-2 rounded-full"
-                                        style={{ backgroundColor: noteCategory.color }}
-                                    />
-                                    <span>{noteCategory.name}</span>
+                                <div
+                                    className={`px-2 py-1 rounded-full text-xs font-medium shadow-sm ${
+                                        isLightColor(noteCategory.color) ? 'text-gray-800' : 'text-white'
+                                    }`}
+                                    style={{ backgroundColor: noteCategory.color }}
+                                >
+                                    {noteCategory.name}
                                 </div>
                             )}
                         </div>
@@ -148,8 +152,8 @@ export default function NoteCard({
                             onToggleFavorite(note.id)
                         }}
                         className={`p-2 rounded-full transition-colors ${note.isFavorite
-                                ? 'text-yellow-600 bg-yellow-100 hover:bg-yellow-200'
-                                : 'text-gray-400 hover:text-yellow-500 hover:bg-yellow-50'
+                            ? 'text-yellow-600 bg-yellow-100 hover:bg-yellow-200'
+                            : 'text-gray-400 hover:text-yellow-500 hover:bg-yellow-50'
                             }`}
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
@@ -203,9 +207,7 @@ export default function NoteCard({
                             <motion.button
                                 onClick={(e) => {
                                     e.stopPropagation()
-                                    if (confirm('¿Estás seguro de eliminar esta nota?')) {
-                                        onDelete(note.id)
-                                    }
+                                    setShowDeleteConfirm(true)
                                 }}
                                 className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-lg font-medium text-sm hover:bg-red-100 transition-colors"
                                 whileHover={{ scale: 1.02 }}
@@ -276,6 +278,19 @@ export default function NoteCard({
                     <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-yellow-400 to-amber-500 rounded-l-xl" />
                 )}
             </div>
+            <ConfirmDialog
+                isOpen={showDeleteConfirm}
+                title="Eliminar nota"
+                message="¿Estás seguro de que quieres eliminar esta nota? Esta acción no se puede deshacer."
+                confirmText="Eliminar"
+                cancelText="Cancelar"
+                variant="danger"
+                onConfirm={() => {
+                    onDelete(note.id)
+                    setShowDeleteConfirm(false)
+                }}
+                onCancel={() => setShowDeleteConfirm(false)}
+            />
         </motion.div>
     )
 }

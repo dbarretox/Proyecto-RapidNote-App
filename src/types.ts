@@ -19,3 +19,14 @@ export interface Category {
     color: string
     createdAt: number
 }
+
+export interface ConfirmDialogProps {
+    isOpen: boolean
+    title: string
+    message: string
+    confirmText?: string
+    cancelText?: string
+    onConfirm: () => void
+    onCancel: () => void
+    variant?: 'danger' | 'warning'
+}

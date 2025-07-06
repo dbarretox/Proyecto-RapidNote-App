@@ -4,7 +4,7 @@ import { NoteList, NoteForm } from "@/components/notes"
 import { SearchBar, SortControls } from "@/components/controls"
 import { motion } from "framer-motion"
 import { Star, Search, Edit3, FileText, Tag } from "lucide-react"
-import { Button } from "@/components/ui"
+import { Button, ConfirmDialog } from "@/components/ui"
 import { Header, BottomNav } from "@/components/layout"
 import { CategorySelector, CategoryForm, CategoryList } from "@/components/categories"
 
@@ -26,6 +26,8 @@ function App() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null)
   const [showCategoryForm, setShowCategoryForm] = useState(false)
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null)
+  const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false)
 
   // Estado para selección múltiple
   const [selectionMode, setSelectionMode] = useState<SelectionMode>({
@@ -99,18 +101,20 @@ function App() {
     if (!title.trim() && !content.trim()) return
 
     const now = Date.now()
+    const categoryToSave = editingCategoryId
 
     if (editingId) {
       setNotes(notes.map(note =>
-        note.id === editingId ? { ...note, title, content, categoryId: selectedCategoryId, updatedAt: now } : note
+        note.id === editingId ? { ...note, title, content, categoryId: categoryToSave, updatedAt: now } : note
       ))
       setEditingId(null)
+      setEditingCategoryId(null)
     } else {
       const newNote: Note = {
         id: now.toString(),
         title,
         content,
-        categoryId: selectedCategoryId,
+        categoryId: categoryToSave,
         isFavorite: false,
         createdAt: now,
         updatedAt: now
@@ -120,6 +124,7 @@ function App() {
 
     setTitle("")
     setContent("")
+    setEditingCategoryId(null)
     setActiveTab('notes')
   }
 
@@ -136,6 +141,7 @@ function App() {
     setEditingId(note.id)
     setTitle(note.title)
     setContent(note.content)
+    setEditingCategoryId(note.categoryId || null)
     setActiveTab('add')
   }
 
@@ -143,6 +149,10 @@ function App() {
     setNotes(notes.map(note =>
       note.id === id ? { ...note, isFavorite: !note.isFavorite, updatedAt: Date.now() } : note
     ))
+  }
+
+  const initializeNewNote = () => {
+    setEditingCategoryId(selectedCategoryId)
   }
 
   // Funciones de selección múltiple
@@ -176,9 +186,14 @@ function App() {
   }
 
   const deleteSelectedNotes = () => {
+    setShowDeleteAllConfirm(true)
+  }
+
+  const confirmDeleteSelectedNotes = () => {
     const idsToDelete = Array.from(selectionMode.selectedIds)
     setNotes(notes.filter(note => !idsToDelete.includes(note.id)))
     setSelectionMode({ isActive: false, selectedIds: new Set() })
+    setShowDeleteAllConfirm(false)
   }
 
   const cancelSelection = () => {
@@ -387,7 +402,10 @@ function App() {
                   <h3 className="text-lg font-medium text-gray-900 mb-2">Sin notas aún</h3>
                   <p className="text-gray-500 mb-6">Crea tu primera nota tocando el botón +</p>
                   <motion.button
-                    onClick={() => setActiveTab('add')}
+                    onClick={() => {
+                      setEditingCategoryId(selectedCategoryId)
+                      setActiveTab('add')
+                    }}
                     className="px-6 py-3 bg-blue-600 text-white rounded-xl font-medium shadow-lg"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
@@ -454,11 +472,8 @@ function App() {
                 setContent={setContent}
                 editingId={editingId}
                 categories={categories}
-                selectedCategoryId={editingId 
-                  ? notes.find(n => n.id === editingId)?.categoryId || null
-                  : selectedCategoryId
-                }
-                onCategoryChange={setSelectedCategoryId}
+                selectedCategoryId={editingCategoryId}
+                onCategoryChange={setEditingCategoryId}
                 onSave={handleSaveNote}
               />
 
@@ -468,6 +483,7 @@ function App() {
                     setEditingId(null)
                     setTitle("")
                     setContent("")
+                    setEditingCategoryId(null)
                     setActiveTab('notes')
                   }}
                   className="mt-4 w-full py-3 text-gray-600 text-center font-medium"
@@ -554,8 +570,22 @@ function App() {
           setEditingId(null)
           setTitle("")
           setContent("")
+          setEditingCategoryId(null)
         }}
         onCancelSelection={cancelSelection}
+        onInitializeNewNote={initializeNewNote}
+      />
+
+      {/* Modal de confirmacion para eliminacion masiva */}
+      <ConfirmDialog
+        isOpen={showDeleteAllConfirm}
+        title="Eliminar notas seleccionadas"
+        message={`¿Estás seguro de que quieres eliminar ${selectionMode.selectedIds.size} nota${selectionMode.selectedIds.size === 1 ? '' : 's'}? Esta acción no se puede deshacer.`}
+        confirmText="Eliminar todas"
+        cancelText="Cancelar"
+        variant="danger"
+        onConfirm={confirmDeleteSelectedNotes}
+        onCancel={() => setShowDeleteAllConfirm(false)}
       />
     </div>
   )

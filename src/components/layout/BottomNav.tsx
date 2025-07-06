@@ -9,6 +9,7 @@ interface BottomNavProps {
     onTabChange: (tab: 'notes' | 'search' | 'add' | 'categories') => void
     onCancelEdit: () => void
     onCancelSelection: () => void
+    onInitializeNewNote: () => void
 }
 
 export default function BottomNav({
@@ -17,7 +18,8 @@ export default function BottomNav({
     selectionMode,
     onTabChange,
     onCancelEdit,
-    onCancelSelection
+    onCancelSelection,
+    onInitializeNewNote
 }: BottomNavProps) {
     const handleTabClick = (tab: 'notes' | 'search' | 'add' | 'categories') => {
         if (selectionMode.isActive) {
@@ -26,6 +28,10 @@ export default function BottomNav({
 
         if (editingId && tab !== 'add') {
             onCancelEdit()
+        }
+
+        if(tab === 'add' && !editingId) {
+            onInitializeNewNote()
         }
 
         onTabChange(tab)
