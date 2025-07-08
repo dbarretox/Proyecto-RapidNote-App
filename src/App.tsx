@@ -325,7 +325,7 @@ function App() {
       />
 
       {/* Contenido principal */}
-      <div className="flex-1 p-4 pb-20">
+      <div className="flex-1 p-4 pb-32">
         <div className="max-w-lg mx-auto">
           {/* Tab: Lista de notas */}
           {activeTab === 'notes' && (

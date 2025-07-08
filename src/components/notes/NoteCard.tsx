@@ -1,7 +1,7 @@
 import type { Note, SelectionMode, Category } from "@/types"
 import { Star, StarOff, Trash2, Pencil, MoreHorizontal, CircleCheckBig, Circle, ChevronDown } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { isLightColor } from "@/utils"
 import { ConfirmDialog } from "@/components/ui"
 
@@ -27,8 +27,26 @@ export default function NoteCard({
     const [showActions, setShowActions] = useState(false)
     const [isExpanded, setIsExpanded] = useState(false)
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-
     const isSelected = selectionMode.selectedIds.has(note.id)
+    const [needsExpansion, setNeedsExpansion] = useState(false)
+    const contentRef = useRef<HTMLParagraphElement>(null)
+
+
+    useEffect(() => {
+        if (contentRef.current && note.content) {
+            const element = contentRef.current
+            element.style.webkitLineClamp = 'none'
+            element.style.overflow = 'visible'
+            
+            const lineHeight = parseFloat(getComputedStyle(element).lineHeight)
+            const maxHeight = lineHeight * 2
+            setNeedsExpansion(element.scrollHeight > maxHeight)
+
+            element.style.webkitLineClamp = ''
+            element.style.overflow = ''
+
+        }
+    }, [note.content])
 
     // Formatear fecha de forma inteligente
     const formatDate = (timestamp: number) => {
@@ -71,7 +89,7 @@ export default function NoteCard({
             layout
         >
             {/* Header */}
-            <div className="flex items-start justify-between p-4 pb-2">
+            <div className="flex items-center justify-between p-4 pb-3">
                 <div className="flex items-start gap-3 flex-1 min-w-0">
                     {/* Checkbox de selección */}
                     {selectionMode.isActive && (
@@ -97,7 +115,7 @@ export default function NoteCard({
                     <div className="flex-1 min-w-0">
                         {/* Título clickeable para expandir */}
                         <div
-                            className={`flex items-start gap-2 ${note.content && !selectionMode.isActive ? 'cursor-pointer hover:text-blue-600' : ''
+                            className={`flex items-center gap-2 ${note.content && !selectionMode.isActive ? 'cursor-pointer hover:text-blue-600' : ''
                                 }`}
                             onClick={(e) => {
                                 e.stopPropagation()
@@ -110,11 +128,11 @@ export default function NoteCard({
                                 }`}>
                                 {note.title || 'Sin título'}
                             </h3>
-                            {note.content && !selectionMode.isActive && (
+                            {needsExpansion && !selectionMode.isActive && (
                                 <motion.div
                                     animate={{ rotate: isExpanded ? 180 : 0 }}
                                     transition={{ duration: 0.2 }}
-                                    className="mt-1"
+                                    className="flex-shrink-0"
                                 >
                                     <ChevronDown className="w-4 h-4 text-gray-400" />
                                 </motion.div>
@@ -151,10 +169,10 @@ export default function NoteCard({
                             e.stopPropagation()
                             onToggleFavorite(note.id)
                         }}
-                        className={`p-2 rounded-full transition-colors ${note.isFavorite
+                        className={`p-1.5 rounded-full transition-colors self-start mt-0.5 ${note.isFavorite
                             ? 'text-yellow-600 bg-yellow-100 hover:bg-yellow-200'
                             : 'text-gray-400 hover:text-yellow-500 hover:bg-yellow-50'
-                            }`}
+                        }`}
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                     >
@@ -168,20 +186,21 @@ export default function NoteCard({
             </div>
 
             {/* Contenido */}
-            <div className="px-4 pb-4">
+            <div className="px-4 pb-6">
                 {/* Texto expandible */}
                 {note.content && (
                     <motion.div
                         initial={false}
                         animate={{
-                            height: isExpanded ? "auto" : "4.5rem",
-                            opacity: 1
+                            height: isExpanded ? "auto" : needsExpansion ? "3rem" : "auto"
                         }}
-                        transition={{ duration: 0.3, ease: "easeInOut" }}
-                        className="overflow-hidden"
+                        transition={{ duration: 0.2, ease: "easeOut" }}
+                        style={{
+                            overflow: isExpanded ? "visible" : "hidden"
+                        }}
+                        className={needsExpansion ? 'mb-2' : 'mb-4'}
                     >
-                        <p className={`text-gray-700 leading-relaxed mb-4 whitespace-pre-wrap ${!isExpanded ? 'line-clamp-3' : ''
-                            }`}>
+                        <p ref={contentRef} className={`text-gray-700 leading-relaxed whitespace-pre-wrap ${(!isExpanded && needsExpansion) ? 'line-clamp-2' : ''}`}>
                             {note.content}
                         </p>
                     </motion.div>
