@@ -1,6 +1,7 @@
 import type { Note, SelectionMode, Category } from "@/types"
 import { Star, StarOff, Trash2, Pencil, CircleCheckBig, Circle, ChevronDown } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence, useMotionValue } from "framer-motion"
+import type { PanInfo } from "framer-motion"
 import { useState, useRef, useEffect } from "react"
 import { isLightColor } from "@/utils"
 import { ConfirmDialog } from "@/components/ui"
@@ -29,6 +30,19 @@ export default function NoteCard({
     const isSelected = selectionMode.selectedIds.has(note.id)
     const [needsExpansion, setNeedsExpansion] = useState(false)
     const contentRef = useRef<HTMLParagraphElement>(null)
+
+    // Swipe gesture values
+    const x = useMotionValue(0)
+
+    const handleDragEnd = (_: unknown, info: PanInfo) => {
+        if (info.offset.x < -100) {
+            // Swipe izquierda: eliminar
+            setShowDeleteConfirm(true)
+        } else if (info.offset.x > 100) {
+            // Swipe derecha: toggle favorito
+            onToggleFavorite(note.id)
+        }
+    }
 
 
     useEffect(() => {
@@ -90,6 +104,13 @@ export default function NoteCard({
             }}
             whileTap={{ scale: selectionMode.isActive ? 0.98 : 1 }}
             layout
+            {...(!selectionMode.isActive && {
+                drag: "x",
+                dragConstraints: { left: 0, right: 0 },
+                dragElastic: 0.7,
+                onDragEnd: handleDragEnd,
+                style: { x, boxShadow: '0 2px 12px -4px rgba(0, 0, 0, 0.08), 0 4px 20px -8px rgba(0, 0, 0, 0.1)' }
+            })}
         >
             {/* Indicador de favorito (barra lateral) */}
             {note.isFavorite && (
