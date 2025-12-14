@@ -1,5 +1,5 @@
 import type { Note, SelectionMode, Category } from "@/types"
-import { Star, StarOff, Trash2, Pencil, MoreHorizontal, CircleCheckBig, Circle, ChevronDown } from "lucide-react"
+import { Star, StarOff, Trash2, Pencil, CircleCheckBig, Circle, ChevronDown } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useState, useRef, useEffect } from "react"
 import { isLightColor } from "@/utils"
@@ -24,7 +24,6 @@ export default function NoteCard({
     onToggleSelection,
     categories
 }: Props) {
-    const [showActions, setShowActions] = useState(false)
     const [isExpanded, setIsExpanded] = useState(false)
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
     const isSelected = selectionMode.selectedIds.has(note.id)
@@ -77,25 +76,17 @@ export default function NoteCard({
 
     return (
         <motion.article
-            className={`note-card-container relative overflow-hidden rounded-2xl transition-all duration-300 ${
-                note.isFavorite
-                    ? "bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 border border-amber-200/60"
-                    : "bg-white border border-gray-100"
-            } ${isSelected ? 'ring-2 ring-blue-500 ring-offset-2' : ''} ${
-                selectionMode.isActive ? 'cursor-pointer' : ''
-            }`}
+            className={`note-card-container relative overflow-hidden rounded-2xl transition-all duration-300 bg-white border border-gray-100 ${
+                isSelected ? 'ring-2 ring-blue-500 ring-offset-2' : ''
+            } ${selectionMode.isActive ? 'cursor-pointer' : ''}`}
             style={{
-                boxShadow: note.isFavorite
-                    ? '0 4px 20px -4px rgba(251, 191, 36, 0.2), 0 2px 8px -2px rgba(0, 0, 0, 0.06)'
-                    : '0 2px 12px -4px rgba(0, 0, 0, 0.08), 0 4px 20px -8px rgba(0, 0, 0, 0.1)'
+                boxShadow: '0 2px 12px -4px rgba(0, 0, 0, 0.08), 0 4px 20px -8px rgba(0, 0, 0, 0.1)'
             }}
             data-note-id={note.id}
             onClick={() => selectionMode.isActive && onToggleSelection(note.id)}
             whileHover={{
                 scale: selectionMode.isActive ? 1.01 : 1,
-                boxShadow: note.isFavorite
-                    ? '0 8px 30px -4px rgba(251, 191, 36, 0.25), 0 4px 12px -2px rgba(0, 0, 0, 0.08)'
-                    : '0 8px 30px -4px rgba(0, 0, 0, 0.12), 0 8px 24px -8px rgba(0, 0, 0, 0.15)'
+                boxShadow: '0 8px 30px -4px rgba(0, 0, 0, 0.12), 0 8px 24px -8px rgba(0, 0, 0, 0.15)'
             }}
             whileTap={{ scale: selectionMode.isActive ? 0.98 : 1 }}
             layout
@@ -204,10 +195,10 @@ export default function NoteCard({
                             e.stopPropagation()
                             onToggleFavorite(note.id)
                         }}
-                        className={`p-2 rounded-xl transition-all duration-200 self-start ${
+                        className={`p-2 rounded-lg self-start ${
                             note.isFavorite
-                                ? 'text-amber-500 bg-amber-100/80 hover:bg-amber-200/80'
-                                : 'text-gray-300 hover:text-amber-400 hover:bg-amber-50'
+                                ? 'text-amber-400'
+                                : 'text-gray-300 hover:text-amber-400'
                         }`}
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
@@ -249,94 +240,30 @@ export default function NoteCard({
 
                 {/* Botones de acción */}
                 {!selectionMode.isActive && (
-                    <div className="flex items-center justify-between pt-2 border-t border-gray-100/80">
-                        <div className="flex items-center gap-2">
-                            <motion.button
-                                onClick={(e) => {
-                                    e.stopPropagation()
-                                    onEdit(note)
-                                }}
-                                className="flex items-center gap-2 px-3.5 py-2 bg-blue-50 text-blue-600 rounded-xl font-medium text-sm hover:bg-blue-100 transition-all duration-200"
-                                whileHover={{ scale: 1.02, backgroundColor: "rgb(219 234 254)" }}
-                                whileTap={{ scale: 0.98 }}
-                            >
-                                <Pencil className="w-4 h-4" />
-                                <span>Editar</span>
-                            </motion.button>
+                    <div className="flex items-center gap-4 pt-2 border-t border-gray-100/80">
+                        <motion.button
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                onEdit(note)
+                            }}
+                            className="flex items-center gap-1.5 text-gray-500 hover:text-blue-600 text-sm transition-colors"
+                            whileTap={{ scale: 0.95 }}
+                        >
+                            <Pencil className="w-4 h-4" />
+                            <span>Editar</span>
+                        </motion.button>
 
-                            <motion.button
-                                onClick={(e) => {
-                                    e.stopPropagation()
-                                    setShowDeleteConfirm(true)
-                                }}
-                                className="flex items-center gap-2 px-3.5 py-2 bg-red-50 text-red-600 rounded-xl font-medium text-sm hover:bg-red-100 transition-all duration-200"
-                                whileHover={{ scale: 1.02, backgroundColor: "rgb(254 226 226)" }}
-                                whileTap={{ scale: 0.98 }}
-                            >
-                                <Trash2 className="w-4 h-4" />
-                                <span>Eliminar</span>
-                            </motion.button>
-                        </div>
-
-                        {/* Menú de más opciones */}
-                        <div className="relative">
-                            <motion.button
-                                onClick={(e) => {
-                                    e.stopPropagation()
-                                    setShowActions(!showActions)
-                                }}
-                                className="p-2 text-gray-400 hover:text-gray-600 rounded-xl hover:bg-gray-100 transition-all duration-200"
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                            >
-                                <MoreHorizontal className="w-5 h-5" />
-                            </motion.button>
-
-                            <AnimatePresence>
-                                {showActions && (
-                                    <>
-                                        <motion.div
-                                            className="fixed inset-0 z-10"
-                                            onClick={() => setShowActions(false)}
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                            exit={{ opacity: 0 }}
-                                        />
-                                        <motion.div
-                                            initial={{ opacity: 0, scale: 0.9, y: -10 }}
-                                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                                            exit={{ opacity: 0, scale: 0.9, y: -10 }}
-                                            transition={{ duration: 0.15 }}
-                                            className="absolute right-0 bottom-full mb-2 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 min-w-[180px] overflow-hidden"
-                                            style={{
-                                                boxShadow: '0 10px 40px -10px rgba(0, 0, 0, 0.2), 0 4px 12px -2px rgba(0, 0, 0, 0.08)'
-                                            }}
-                                        >
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation()
-                                                    onToggleFavorite(note.id)
-                                                    setShowActions(false)
-                                                }}
-                                                className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
-                                            >
-                                                {note.isFavorite ? (
-                                                    <>
-                                                        <StarOff className="w-4 h-4 text-gray-400" />
-                                                        <span>Quitar favorito</span>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <Star className="w-4 h-4 text-amber-500" />
-                                                        <span>Marcar favorito</span>
-                                                    </>
-                                                )}
-                                            </button>
-                                        </motion.div>
-                                    </>
-                                )}
-                            </AnimatePresence>
-                        </div>
+                        <motion.button
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                setShowDeleteConfirm(true)
+                            }}
+                            className="flex items-center gap-1.5 text-gray-400 hover:text-red-500 text-sm transition-colors"
+                            whileTap={{ scale: 0.95 }}
+                        >
+                            <Trash2 className="w-4 h-4" />
+                            <span>Eliminar</span>
+                        </motion.button>
                     </div>
                 )}
             </div>
