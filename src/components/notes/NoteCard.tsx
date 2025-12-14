@@ -1,6 +1,6 @@
 import type { Note, SelectionMode, Category } from "@/types"
 import { Star, StarOff, Trash2, Pencil, CircleCheckBig, Circle, ChevronDown } from "lucide-react"
-import { motion, AnimatePresence, useMotionValue } from "framer-motion"
+import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion"
 import type { PanInfo } from "framer-motion"
 import { useState, useRef, useEffect } from "react"
 import { isLightColor } from "@/utils"
@@ -33,6 +33,10 @@ export default function NoteCard({
 
     // Swipe gesture values
     const x = useMotionValue(0)
+    // Opacidad del icono de eliminar (aparece al swipear izquierda)
+    const deleteIconOpacity = useTransform(x, [-100, -50, 0], [1, 0.5, 0])
+    // Opacidad del icono de favorito (aparece al swipear derecha)
+    const favoriteIconOpacity = useTransform(x, [0, 50, 100], [0, 0.5, 1])
 
     const handleDragEnd = (_: unknown, info: PanInfo) => {
         if (info.offset.x < -100) {
@@ -89,29 +93,46 @@ export default function NoteCard({
         : null
 
     return (
-        <motion.article
-            className={`note-card-container relative overflow-hidden rounded-2xl transition-all duration-300 bg-white border border-gray-100 ${
-                isSelected ? 'ring-2 ring-blue-500 ring-offset-2' : ''
-            } ${selectionMode.isActive ? 'cursor-pointer' : ''}`}
-            style={{
-                boxShadow: '0 2px 12px -4px rgba(0, 0, 0, 0.08), 0 4px 20px -8px rgba(0, 0, 0, 0.1)'
-            }}
-            data-note-id={note.id}
-            onClick={() => selectionMode.isActive && onToggleSelection(note.id)}
-            whileHover={{
-                scale: selectionMode.isActive ? 1.01 : 1,
-                boxShadow: '0 8px 30px -4px rgba(0, 0, 0, 0.12), 0 8px 24px -8px rgba(0, 0, 0, 0.15)'
-            }}
-            whileTap={{ scale: selectionMode.isActive ? 0.98 : 1 }}
-            layout
-            {...(!selectionMode.isActive && {
-                drag: "x",
-                dragConstraints: { left: 0, right: 0 },
-                dragElastic: 0.7,
-                onDragEnd: handleDragEnd,
-                style: { x, boxShadow: '0 2px 12px -4px rgba(0, 0, 0, 0.08), 0 4px 20px -8px rgba(0, 0, 0, 0.1)' }
-            })}
-        >
+        <div className="note-card-container relative overflow-hidden rounded-2xl" data-note-id={note.id}>
+            {/* Fondo de eliminar (rojo) - visible al swipear izquierda */}
+            <motion.div
+                className="absolute inset-0 bg-red-500 flex items-center justify-end pr-6 rounded-2xl"
+                style={{ opacity: deleteIconOpacity }}
+            >
+                <Trash2 className="w-6 h-6 text-white" />
+            </motion.div>
+
+            {/* Fondo de favorito (amarillo) - visible al swipear derecha */}
+            <motion.div
+                className="absolute inset-0 bg-amber-400 flex items-center justify-start pl-6 rounded-2xl"
+                style={{ opacity: favoriteIconOpacity }}
+            >
+                <Star className="w-6 h-6 text-white" fill="white" />
+            </motion.div>
+
+            {/* Card */}
+            <motion.article
+                className={`relative overflow-hidden rounded-2xl transition-all duration-300 bg-white border border-gray-100 ${
+                    isSelected ? 'ring-2 ring-blue-500 ring-offset-2' : ''
+                } ${selectionMode.isActive ? 'cursor-pointer' : ''}`}
+                style={{
+                    boxShadow: '0 2px 12px -4px rgba(0, 0, 0, 0.08), 0 4px 20px -8px rgba(0, 0, 0, 0.1)'
+                }}
+                onClick={() => selectionMode.isActive && onToggleSelection(note.id)}
+                whileHover={{
+                    scale: selectionMode.isActive ? 1.01 : 1,
+                    boxShadow: '0 8px 30px -4px rgba(0, 0, 0, 0.12), 0 8px 24px -8px rgba(0, 0, 0, 0.15)'
+                }}
+                whileTap={{ scale: selectionMode.isActive ? 0.98 : 1 }}
+                layout
+                {...(!selectionMode.isActive && {
+                    drag: "x",
+                    dragConstraints: { left: 0, right: 0 },
+                    dragElastic: 0.7,
+                    onDragEnd: handleDragEnd,
+                    style: { x, boxShadow: '0 2px 12px -4px rgba(0, 0, 0, 0.08), 0 4px 20px -8px rgba(0, 0, 0, 0.1)' }
+                })}
+            >
             {/* Indicador de favorito (barra lateral) */}
             {note.isFavorite && (
                 <motion.div
@@ -302,6 +323,7 @@ export default function NoteCard({
                 }}
                 onCancel={() => setShowDeleteConfirm(false)}
             />
-        </motion.article>
+            </motion.article>
+        </div>
     )
 }
