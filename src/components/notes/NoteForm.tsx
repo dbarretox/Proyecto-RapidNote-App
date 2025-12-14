@@ -1,6 +1,6 @@
 import type { Category } from "@/types"
 import { motion } from "framer-motion"
-import { Save, Plus, Type, FileText } from "lucide-react"
+import { Save, Plus, Type, FileText, Keyboard } from "lucide-react"
 import { useRef, useEffect } from "react"
 import { CategorySelector } from "../categories"
 
@@ -16,16 +16,16 @@ type Props = {
     onSave: () => void
 }
 
-export default function NoteForm({ 
-    title, 
-    setTitle, 
-    content, 
-    setContent, 
-    editingId, 
+export default function NoteForm({
+    title,
+    setTitle,
+    content,
+    setContent,
+    editingId,
     categories,
     selectedCategoryId,
     onCategoryChange,
-    onSave 
+    onSave
 }: Props) {
     const titleRef = useRef<HTMLInputElement>(null)
     const contentRef = useRef<HTMLTextAreaElement>(null)
@@ -42,7 +42,7 @@ export default function NoteForm({
         const textarea = contentRef.current
         if (textarea) {
             textarea.style.height = 'auto'
-            textarea.style.height = `${Math.max(120, textarea.scrollHeight)}px`
+            textarea.style.height = `${Math.max(140, textarea.scrollHeight)}px`
         }
     }, [content])
 
@@ -56,7 +56,6 @@ export default function NoteForm({
 
     const handleSave = () => {
         if (!title.trim() && !content.trim()) {
-            // Mostrar feedback visual o toast aquí si quieres
             return
         }
         onSave()
@@ -66,15 +65,20 @@ export default function NoteForm({
 
     return (
         <motion.div
-            className="space-y-4"
+            className="space-y-5"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
         >
             {/* Input de título */}
-            <div className="relative">
-                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                    <Type className="w-5 h-5 text-gray-400" />
+            <motion.div
+                className="relative group"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 }}
+            >
+                <div className="absolute left-4 top-1/2 transform -translate-y-1/2 pointer-events-none transition-colors duration-200 group-focus-within:text-blue-500">
+                    <Type className="w-5 h-5 text-gray-400 group-focus-within:text-blue-500" />
                 </div>
                 <input
                     ref={titleRef}
@@ -83,15 +87,20 @@ export default function NoteForm({
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    className="w-full pl-12 pr-4 py-4 text-lg font-medium border-2 border-gray-200 rounded-xl bg-white focus:border-blue-500 focus:ring-0 outline-none transition-colors placeholder-gray-400"
+                    className="w-full pl-12 pr-4 py-4 text-lg font-semibold bg-white border-2 border-gray-100 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all duration-200 placeholder-gray-400 shadow-sm hover:border-gray-200"
                     autoComplete="off"
                 />
-            </div>
+            </motion.div>
 
             {/* Textarea de contenido */}
-            <div className="relative">
-                <div className="absolute left-3 top-4 pointer-events-none">
-                    <FileText className="w-5 h-5 text-gray-400" />
+            <motion.div
+                className="relative group"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.15 }}
+            >
+                <div className="absolute left-4 top-4 pointer-events-none transition-colors duration-200">
+                    <FileText className="w-5 h-5 text-gray-400 group-focus-within:text-blue-500" />
                 </div>
                 <textarea
                     ref={contentRef}
@@ -99,14 +108,19 @@ export default function NoteForm({
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    className="w-full pl-12 pr-4 py-4 text-base leading-relaxed border-2 border-gray-200 rounded-xl bg-white focus:border-blue-500 focus:ring-0 outline-none transition-colors placeholder-gray-400 resize-none min-h-[120px]"
+                    className="w-full pl-12 pr-4 py-4 text-base leading-relaxed bg-white border-2 border-gray-100 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all duration-200 placeholder-gray-400 resize-none min-h-[140px] shadow-sm hover:border-gray-200"
                     rows={4}
                 />
-            </div>
+            </motion.div>
 
             {/* Selector de categorías */}
-            <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
+            <motion.div
+                className="space-y-2"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 }}
+            >
+                <label className="block text-sm font-semibold text-gray-700 ml-1">
                     Categoría
                 </label>
                 <CategorySelector
@@ -114,33 +128,42 @@ export default function NoteForm({
                     selectedCategoryId={selectedCategoryId}
                     onCategorySelect={onCategoryChange}
                 />
-            </div>
+            </motion.div>
 
             {/* Contador de caracteres */}
-            <div className="flex justify-between items-center text-xs text-gray-500">
-                <div className="flex gap-4">
+            <motion.div
+                className="flex justify-between items-center text-xs px-1"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.25 }}
+            >
+                <div className="flex gap-4 text-gray-400">
                     {title.length > 0 && (
-                        <span>Título: {title.length} caracteres</span>
+                        <span className="flex items-center gap-1">
+                            <span className="font-medium text-gray-500">{title.length}</span> caracteres en título
+                        </span>
                     )}
                     {content.length > 0 && (
-                        <span>Contenido: {content.length} caracteres</span>
+                        <span className="flex items-center gap-1">
+                            <span className="font-medium text-gray-500">{content.length}</span> caracteres en contenido
+                        </span>
                     )}
                 </div>
-            </div>
+            </motion.div>
 
             {/* Botón de guardar */}
             <motion.button
                 onClick={handleSave}
                 disabled={isDisabled}
-                className={`w-full py-4 rounded-xl font-semibold text-base flex items-center justify-center gap-3 transition-all ${isDisabled
-                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        : 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 shadow-lg hover:shadow-xl'
+                className={`w-full py-4 rounded-2xl font-semibold text-base flex items-center justify-center gap-3 transition-all duration-300 ${isDisabled
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'btn-primary text-white'
                     }`}
-                whileHover={!isDisabled ? { scale: 1.02 } : {}}
-                whileTap={!isDisabled ? { scale: 0.98 } : {}}
+                whileHover={!isDisabled ? { scale: 1.01, y: -2 } : {}}
+                whileTap={!isDisabled ? { scale: 0.99 } : {}}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
+                transition={{ delay: 0.3 }}
             >
                 {editingId ? (
                     <>
@@ -157,24 +180,16 @@ export default function NoteForm({
 
             {/* Ayuda de teclado */}
             <motion.div
-                className="text-center text-xs text-gray-400"
+                className="flex items-center justify-center gap-2 text-xs text-gray-400"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
+                transition={{ delay: 0.4 }}
             >
-                {navigator.platform.includes('Mac') ? 'Cmd' : 'Ctrl'} + Enter para guardar rápido
+                <Keyboard className="w-3.5 h-3.5" />
+                <span>
+                    {navigator.platform.includes('Mac') ? 'Cmd' : 'Ctrl'} + Enter para guardar rápido
+                </span>
             </motion.div>
-
-            {/* Mensaje de estado */}
-            {isDisabled && (title.length > 0 || content.length > 0) && (
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="text-center text-sm text-gray-500 bg-gray-50 py-3 px-4 rounded-xl"
-                >
-                    ✍️ Sigue escribiendo para poder guardar la nota
-                </motion.div>
-            )}
         </motion.div>
     )
 }

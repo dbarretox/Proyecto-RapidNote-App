@@ -12,6 +12,12 @@ interface BottomNavProps {
     onInitializeNewNote: () => void
 }
 
+const navItems = [
+    { id: 'notes' as const, icon: Menu, label: 'Notas' },
+    { id: 'search' as const, icon: Search, label: 'Buscar' },
+    { id: 'categories' as const, icon: Tag, label: 'Categorías' },
+]
+
 export default function BottomNav({
     activeTab,
     editingId,
@@ -30,7 +36,7 @@ export default function BottomNav({
             onCancelEdit()
         }
 
-        if(tab === 'add' && !editingId) {
+        if (tab === 'add' && !editingId) {
             onInitializeNewNote()
         }
 
@@ -38,50 +44,106 @@ export default function BottomNav({
     }
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 pt-3 pb-5">
-            <div className="max-w-lg mx-auto">
-                <div className="flex justify-around items-end">
-                    <motion.button
-                        onClick={() => handleTabClick('notes')}
-                        className={`flex flex-col items-center py-2 px-4 rounded-lg transition-colors ${activeTab === 'notes' ? 'text-blue-600 bg-blue-50' : 'text-gray-500'
-                            }`}
-                    >
-                        <Menu className="w-6 h-6 mb-1" />
-                        <span className="text-xs font-medium">Notas</span>
-                    </motion.button>
-                    <motion.button
-                        onClick={() => handleTabClick('search')}
-                        className={`flex flex-col items-center py-2 px-4 rounded-lg transition-colors ${activeTab === 'search' ? 'text-blue-600 bg-blue-50' : 'text-gray-500'
-                            }`}
-                    >
-                        <Search className="w-6 h-6 mb-1" />
-                        <span className="text-xs font-medium">Buscar</span>
-                    </motion.button>
-                    <motion.button
-                        onClick={() => handleTabClick('categories')}
-                        className={`flex flex-col items-center py-2 px-4 rounded-lg transition-colors ${activeTab === 'categories' ? 'text-blue-600 bg-blue-50' : 'text-gray-500'
-                            }`}
-                    >
-                        <Tag className="w-6 h-6 mb-1" />
-                        <span className="text-xs font-medium">Categorías</span>
-                    </motion.button>
-                    <motion.button
-                        onClick={() => handleTabClick('add')}
-                        className="flex flex-col items-center"
-                    >
-                        <div className={`relative w-10 h-10 rounded-xl flex items-center justify-center ${activeTab === 'add'
-                                ? 'bg-blue-600 ring-2 ring-blue-200 ring-offset-2 scale-105'
-                                : 'bg-blue-600'
-                            } mb-1`}>
-                            <Plus className="w-6 h-6 text-white" />
-                        </div>
-                        <span className={`text-xs font-medium ${activeTab === 'add' ? 'text-blue-600' : 'text-gray-600'
+        <motion.nav
+            className="fixed bottom-0 left-0 right-0 glass-strong safe-area-bottom z-50"
+            initial={{ y: 100 }}
+            animate={{ y: 0 }}
+            transition={{ type: "spring", stiffness: 400, damping: 40 }}
+        >
+            {/* Línea decorativa superior */}
+            <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
+
+            <div className="px-4 pt-2 pb-4">
+                <div className="max-w-lg mx-auto">
+                    <div className="flex justify-around items-end relative">
+                        {/* Items de navegación regulares */}
+                        {navItems.map((item) => {
+                            const Icon = item.icon
+                            const isActive = activeTab === item.id
+                            return (
+                                <motion.button
+                                    key={item.id}
+                                    onClick={() => handleTabClick(item.id)}
+                                    className={`relative flex flex-col items-center py-2 px-4 rounded-2xl transition-all duration-200 ${
+                                        isActive
+                                            ? 'text-blue-600'
+                                            : 'text-gray-400 hover:text-gray-600'
+                                    }`}
+                                    whileTap={{ scale: 0.92 }}
+                                >
+                                    {/* Indicador de fondo activo */}
+                                    {isActive && (
+                                        <motion.div
+                                            layoutId="navIndicator"
+                                            className="absolute inset-0 bg-blue-50 rounded-2xl"
+                                            initial={false}
+                                            transition={{
+                                                type: "spring",
+                                                stiffness: 500,
+                                                damping: 35
+                                            }}
+                                        />
+                                    )}
+                                    <div className="relative z-10">
+                                        <Icon className={`w-6 h-6 mb-1 transition-transform duration-200 ${
+                                            isActive ? 'scale-110' : ''
+                                        }`} />
+                                        <span className={`text-xs font-medium ${
+                                            isActive ? 'font-semibold' : ''
+                                        }`}>
+                                            {item.label}
+                                        </span>
+                                    </div>
+                                </motion.button>
+                            )
+                        })}
+
+                        {/* Botón FAB de crear/editar */}
+                        <motion.button
+                            onClick={() => handleTabClick('add')}
+                            className="flex flex-col items-center relative"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                        >
+                            <motion.div
+                                className={`relative w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition-all duration-300 ${
+                                    activeTab === 'add'
+                                        ? 'bg-gradient-to-br from-blue-500 to-blue-600 shadow-blue-500/40 ring-4 ring-blue-100'
+                                        : 'bg-gradient-to-br from-blue-500 to-blue-600 shadow-blue-500/30'
+                                }`}
+                                animate={{
+                                    rotate: activeTab === 'add' ? 45 : 0,
+                                }}
+                                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                            >
+                                <Plus className="w-6 h-6 text-white" />
+                            </motion.div>
+                            <span className={`text-xs font-medium mt-1 transition-colors ${
+                                activeTab === 'add' ? 'text-blue-600 font-semibold' : 'text-gray-500'
                             }`}>
-                            {editingId ? 'Editar' : 'Crear'}
-                        </span>
-                    </motion.button>
+                                {editingId ? 'Editar' : 'Crear'}
+                            </span>
+
+                            {/* Pulse animado cuando está activo */}
+                            {activeTab === 'add' && (
+                                <motion.div
+                                    className="absolute top-0 w-12 h-12 rounded-2xl bg-blue-400"
+                                    initial={{ opacity: 0.4, scale: 1 }}
+                                    animate={{
+                                        opacity: 0,
+                                        scale: 1.5,
+                                    }}
+                                    transition={{
+                                        duration: 1.5,
+                                        repeat: Infinity,
+                                        ease: "easeOut"
+                                    }}
+                                />
+                            )}
+                        </motion.button>
+                    </div>
                 </div>
             </div>
-        </div>
+        </motion.nav>
     )
 }

@@ -37,7 +37,7 @@ export default function NoteCard({
             const element = contentRef.current
             element.style.webkitLineClamp = 'none'
             element.style.overflow = 'visible'
-            
+
             const lineHeight = parseFloat(getComputedStyle(element).lineHeight)
             const maxHeight = lineHeight * 2
             setNeedsExpansion(element.scrollHeight > maxHeight)
@@ -76,47 +76,73 @@ export default function NoteCard({
         : null
 
     return (
-        <motion.div
-            className={`note-card-container relative rounded-xl shadow-sm border transition-all duration-200 ${note.isFavorite
-                ? "border-yellow-200 bg-gradient-to-r from-yellow-50 to-amber-50"
-                : "border-gray-200 bg-white hover:border-gray-300"
-                } ${isSelected ? 'ring-2 ring-blue-500 ring-opacity-50' : ''} ${selectionMode.isActive ? 'cursor-pointer' : ''
-                }`}
+        <motion.article
+            className={`note-card-container relative overflow-hidden rounded-2xl transition-all duration-300 ${
+                note.isFavorite
+                    ? "bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 border border-amber-200/60"
+                    : "bg-white border border-gray-100"
+            } ${isSelected ? 'ring-2 ring-blue-500 ring-offset-2' : ''} ${
+                selectionMode.isActive ? 'cursor-pointer' : ''
+            }`}
+            style={{
+                boxShadow: note.isFavorite
+                    ? '0 4px 20px -4px rgba(251, 191, 36, 0.2), 0 2px 8px -2px rgba(0, 0, 0, 0.06)'
+                    : '0 2px 12px -4px rgba(0, 0, 0, 0.08), 0 4px 20px -8px rgba(0, 0, 0, 0.1)'
+            }}
             data-note-id={note.id}
             onClick={() => selectionMode.isActive && onToggleSelection(note.id)}
-            whileHover={{ scale: selectionMode.isActive ? 1.01 : 1 }}
-            whileTap={{ scale: selectionMode.isActive ? 0.99 : 1 }}
+            whileHover={{
+                scale: selectionMode.isActive ? 1.01 : 1,
+                boxShadow: note.isFavorite
+                    ? '0 8px 30px -4px rgba(251, 191, 36, 0.25), 0 4px 12px -2px rgba(0, 0, 0, 0.08)'
+                    : '0 8px 30px -4px rgba(0, 0, 0, 0.12), 0 8px 24px -8px rgba(0, 0, 0, 0.15)'
+            }}
+            whileTap={{ scale: selectionMode.isActive ? 0.98 : 1 }}
             layout
         >
+            {/* Indicador de favorito (barra lateral) */}
+            {note.isFavorite && (
+                <motion.div
+                    className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-amber-400 via-yellow-400 to-orange-400 rounded-l-2xl"
+                    initial={{ scaleY: 0 }}
+                    animate={{ scaleY: 1 }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
+                />
+            )}
+
             {/* Header */}
             <div className="flex items-center justify-between p-4 pb-3">
                 <div className="flex items-start gap-3 flex-1 min-w-0">
                     {/* Checkbox de selección */}
-                    {selectionMode.isActive && (
-                        <motion.button
-                            onClick={(e) => {
-                                e.stopPropagation()
-                                onToggleSelection(note.id)
-                            }}
-                            className="flex-shrink-0 mt-1"
-                            initial={{ scale: 0, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                        >
-                            {isSelected ? (
-                                <CircleCheckBig className="w-6 h-6 text-blue-600" />
-                            ) : (
-                                <Circle className="w-6 h-6 text-gray-400" />
-                            )}
-                        </motion.button>
-                    )}
+                    <AnimatePresence>
+                        {selectionMode.isActive && (
+                            <motion.button
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    onToggleSelection(note.id)
+                                }}
+                                className="flex-shrink-0 mt-0.5"
+                                initial={{ scale: 0, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                exit={{ scale: 0, opacity: 0 }}
+                                whileHover={{ scale: 1.15 }}
+                                whileTap={{ scale: 0.9 }}
+                            >
+                                {isSelected ? (
+                                    <CircleCheckBig className="w-6 h-6 text-blue-600" />
+                                ) : (
+                                    <Circle className="w-6 h-6 text-gray-300" />
+                                )}
+                            </motion.button>
+                        )}
+                    </AnimatePresence>
 
                     <div className="flex-1 min-w-0">
                         {/* Título clickeable para expandir */}
                         <div
-                            className={`flex items-center gap-2 ${note.content && !selectionMode.isActive ? 'cursor-pointer hover:text-blue-600' : ''
-                                }`}
+                            className={`flex items-center gap-2 ${
+                                note.content && !selectionMode.isActive ? 'cursor-pointer group' : ''
+                            }`}
                             onClick={(e) => {
                                 e.stopPropagation()
                                 if (!selectionMode.isActive && note.content) {
@@ -124,39 +150,48 @@ export default function NoteCard({
                                 }
                             }}
                         >
-                            <h3 className={`font-semibold text-gray-900 mb-1 leading-tight flex-1 transition-colors ${note.title ? 'text-lg' : 'text-base italic text-gray-500'
-                                }`}>
+                            <h3 className={`font-semibold leading-tight flex-1 transition-colors ${
+                                note.title ? 'text-lg text-gray-900 group-hover:text-blue-600' : 'text-base italic text-gray-400'
+                            }`}>
                                 {note.title || 'Sin título'}
                             </h3>
                             {needsExpansion && !selectionMode.isActive && (
                                 <motion.div
                                     animate={{ rotate: isExpanded ? 180 : 0 }}
-                                    transition={{ duration: 0.2 }}
-                                    className="flex-shrink-0"
+                                    transition={{ duration: 0.2, ease: "easeInOut" }}
+                                    className="flex-shrink-0 p-1 rounded-full hover:bg-gray-100 transition-colors"
                                 >
                                     <ChevronDown className="w-4 h-4 text-gray-400" />
                                 </motion.div>
                             )}
                         </div>
 
-                        {/* Fecha */}
-                        <div className="flex items-center gap-2 text-xs text-gray-500">
-                            <span>{formatDate(note.createdAt || parseInt(note.id))}</span>
+                        {/* Metadata: fecha y categoría */}
+                        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                            <span className="text-xs text-gray-400 font-medium">
+                                {formatDate(note.createdAt || parseInt(note.id))}
+                            </span>
                             {note.updatedAt && note.updatedAt !== note.createdAt && (
                                 <>
-                                    <span>•</span>
-                                    <span>editado {formatDate(note.updatedAt)}</span>
+                                    <span className="text-gray-300">•</span>
+                                    <span className="text-xs text-gray-400">
+                                        editado {formatDate(note.updatedAt)}
+                                    </span>
                                 </>
                             )}
                             {noteCategory && (
-                                <div
-                                    className={`px-2 py-1 rounded-full text-xs font-medium shadow-sm ${
-                                        isLightColor(noteCategory.color) ? 'text-gray-800' : 'text-white'
+                                <motion.div
+                                    className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
+                                        isLightColor(noteCategory.color) ? 'text-gray-700' : 'text-white'
                                     }`}
-                                    style={{ backgroundColor: noteCategory.color }}
+                                    style={{
+                                        backgroundColor: noteCategory.color,
+                                        boxShadow: `0 2px 8px -2px ${noteCategory.color}50`
+                                    }}
+                                    whileHover={{ scale: 1.05 }}
                                 >
                                     {noteCategory.name}
-                                </div>
+                                </motion.div>
                             )}
                         </div>
                     </div>
@@ -169,9 +204,10 @@ export default function NoteCard({
                             e.stopPropagation()
                             onToggleFavorite(note.id)
                         }}
-                        className={`p-1.5 rounded-full transition-colors self-start mt-0.5 ${note.isFavorite
-                            ? 'text-yellow-600 bg-yellow-100 hover:bg-yellow-200'
-                            : 'text-gray-400 hover:text-yellow-500 hover:bg-yellow-50'
+                        className={`p-2 rounded-xl transition-all duration-200 self-start ${
+                            note.isFavorite
+                                ? 'text-amber-500 bg-amber-100/80 hover:bg-amber-200/80'
+                                : 'text-gray-300 hover:text-amber-400 hover:bg-amber-50'
                         }`}
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
@@ -186,7 +222,7 @@ export default function NoteCard({
             </div>
 
             {/* Contenido */}
-            <div className="px-4 pb-6">
+            <div className="px-4 pb-4">
                 {/* Texto expandible */}
                 {note.content && (
                     <motion.div
@@ -194,13 +230,18 @@ export default function NoteCard({
                         animate={{
                             height: isExpanded ? "auto" : needsExpansion ? "3rem" : "auto"
                         }}
-                        transition={{ duration: 0.2, ease: "easeOut" }}
+                        transition={{ duration: 0.25, ease: "easeInOut" }}
                         style={{
                             overflow: isExpanded ? "visible" : "hidden"
                         }}
-                        className={needsExpansion ? 'mb-2' : 'mb-4'}
+                        className={needsExpansion ? 'mb-3' : 'mb-4'}
                     >
-                        <p ref={contentRef} className={`text-gray-700 leading-relaxed whitespace-pre-wrap ${(!isExpanded && needsExpansion) ? 'line-clamp-2' : ''}`}>
+                        <p
+                            ref={contentRef}
+                            className={`text-gray-600 leading-relaxed whitespace-pre-wrap text-sm ${
+                                (!isExpanded && needsExpansion) ? 'line-clamp-2' : ''
+                            }`}
+                        >
                             {note.content}
                         </p>
                     </motion.div>
@@ -208,19 +249,19 @@ export default function NoteCard({
 
                 {/* Botones de acción */}
                 {!selectionMode.isActive && (
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between pt-2 border-t border-gray-100/80">
                         <div className="flex items-center gap-2">
                             <motion.button
                                 onClick={(e) => {
                                     e.stopPropagation()
                                     onEdit(note)
                                 }}
-                                className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg font-medium text-sm hover:bg-blue-100 transition-colors"
-                                whileHover={{ scale: 1.02 }}
+                                className="flex items-center gap-2 px-3.5 py-2 bg-blue-50 text-blue-600 rounded-xl font-medium text-sm hover:bg-blue-100 transition-all duration-200"
+                                whileHover={{ scale: 1.02, backgroundColor: "rgb(219 234 254)" }}
                                 whileTap={{ scale: 0.98 }}
                             >
                                 <Pencil className="w-4 h-4" />
-                                Editar
+                                <span>Editar</span>
                             </motion.button>
 
                             <motion.button
@@ -228,12 +269,12 @@ export default function NoteCard({
                                     e.stopPropagation()
                                     setShowDeleteConfirm(true)
                                 }}
-                                className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-lg font-medium text-sm hover:bg-red-100 transition-colors"
-                                whileHover={{ scale: 1.02 }}
+                                className="flex items-center gap-2 px-3.5 py-2 bg-red-50 text-red-600 rounded-xl font-medium text-sm hover:bg-red-100 transition-all duration-200"
+                                whileHover={{ scale: 1.02, backgroundColor: "rgb(254 226 226)" }}
                                 whileTap={{ scale: 0.98 }}
                             >
                                 <Trash2 className="w-4 h-4" />
-                                Eliminar
+                                <span>Eliminar</span>
                             </motion.button>
                         </div>
 
@@ -244,7 +285,7 @@ export default function NoteCard({
                                     e.stopPropagation()
                                     setShowActions(!showActions)
                                 }}
-                                className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
+                                className="p-2 text-gray-400 hover:text-gray-600 rounded-xl hover:bg-gray-100 transition-all duration-200"
                                 whileHover={{ scale: 1.1 }}
                                 whileTap={{ scale: 0.9 }}
                             >
@@ -254,15 +295,22 @@ export default function NoteCard({
                             <AnimatePresence>
                                 {showActions && (
                                     <>
-                                        <div
+                                        <motion.div
                                             className="fixed inset-0 z-10"
                                             onClick={() => setShowActions(false)}
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            exit={{ opacity: 0 }}
                                         />
                                         <motion.div
                                             initial={{ opacity: 0, scale: 0.9, y: -10 }}
                                             animate={{ opacity: 1, scale: 1, y: 0 }}
                                             exit={{ opacity: 0, scale: 0.9, y: -10 }}
-                                            className="absolute right-0 bottom-full mb-2 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50 min-w-[160px]"
+                                            transition={{ duration: 0.15 }}
+                                            className="absolute right-0 bottom-full mb-2 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 min-w-[180px] overflow-hidden"
+                                            style={{
+                                                boxShadow: '0 10px 40px -10px rgba(0, 0, 0, 0.2), 0 4px 12px -2px rgba(0, 0, 0, 0.08)'
+                                            }}
                                         >
                                             <button
                                                 onClick={(e) => {
@@ -274,12 +322,12 @@ export default function NoteCard({
                                             >
                                                 {note.isFavorite ? (
                                                     <>
-                                                        <StarOff className="w-4 h-4 text-gray-500" />
+                                                        <StarOff className="w-4 h-4 text-gray-400" />
                                                         <span>Quitar favorito</span>
                                                     </>
                                                 ) : (
                                                     <>
-                                                        <Star className="w-4 h-4 text-yellow-500" />
+                                                        <Star className="w-4 h-4 text-amber-500" />
                                                         <span>Marcar favorito</span>
                                                     </>
                                                 )}
@@ -291,12 +339,8 @@ export default function NoteCard({
                         </div>
                     </div>
                 )}
-
-                {/* Indicador visual de favorito */}
-                {note.isFavorite && (
-                    <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-yellow-400 to-amber-500 rounded-l-xl" />
-                )}
             </div>
+
             <ConfirmDialog
                 isOpen={showDeleteConfirm}
                 title="Eliminar nota"
@@ -310,6 +354,6 @@ export default function NoteCard({
                 }}
                 onCancel={() => setShowDeleteConfirm(false)}
             />
-        </motion.div>
+        </motion.article>
     )
 }
