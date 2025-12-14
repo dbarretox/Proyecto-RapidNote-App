@@ -7,6 +7,7 @@ import { Star, Search, Edit3, FileText, Tag } from "lucide-react"
 import { Button, ConfirmDialog } from "@/components/ui"
 import { Header, BottomNav } from "@/components/layout"
 import { CategorySelector, CategoryForm, CategoryList } from "@/components/categories"
+import { UpdatePrompt } from "@/components/pwa"
 
 
 function App() {
@@ -595,6 +596,9 @@ function App() {
         onConfirm={confirmDeleteSelectedNotes}
         onCancel={() => setShowDeleteAllConfirm(false)}
       />
+
+      {/* Prompt de actualización PWA */}
+      <UpdatePrompt />
     </div>
   )
 }

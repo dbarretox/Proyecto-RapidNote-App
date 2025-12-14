@@ -16,24 +16,81 @@ export default defineConfig({
     tailwindcss(),
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt', // Cambiado a prompt para control manual
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,webp}'],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff,woff2}'],
+        // Limpiar caches antiguos
+        cleanupOutdatedCaches: true,
+        // Skip waiting - el nuevo SW toma control inmediatamente
+        skipWaiting: true,
+        // Clients claim - el SW controla todas las pestañas
+        clientsClaim: true,
+        // Estrategias de caching
         runtimeCaching: [
           {
+            // HTML principal - Network First (siempre intenta obtener la última versión)
+            urlPattern: /^https:\/\/.*\/$/,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'html-cache',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 // 1 día
+              },
+              networkTimeoutSeconds: 3
+            }
+          },
+          {
+            // Assets JS/CSS - Stale While Revalidate
+            urlPattern: /\.(?:js|css)$/,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'assets-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 * 7 // 1 semana
+              }
+            }
+          },
+          {
+            // Imágenes - Cache First
+            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|ico)$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'images-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 días
+              }
+            }
+          },
+          {
+            // Google Fonts
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'CacheFirst',
             options: {
               cacheName: 'google-fonts-cache',
               expiration: {
                 maxEntries: 10,
-                maxAgeSeconds: 60 * 60* 24* 365 // 1 año
+                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 año
+              }
+            }
+          },
+          {
+            // Google Fonts Files
+            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-fonts-files',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 365
               }
             }
           }
         ]
       },
-      includeAssets: ['favicon.svg', 'favicon.ico', 'robots.txt', 'apple-touch-icons.png'],
+      includeAssets: ['favicon.svg', 'favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
       manifest: {
         name: 'RapidNote - Notas Rápidas',
         short_name: 'RapidNote',
@@ -41,7 +98,7 @@ export default defineConfig({
         theme_color: '#2563eb',
         background_color: '#f3f4f6',
         display: 'standalone',
-        orientation: "portrait-primary",
+        orientation: 'portrait-primary',
         start_url: '/',
         scope: '/',
         categories: ['productivity', 'utilities'],
@@ -73,13 +130,11 @@ export default defineConfig({
         ]
       },
       devOptions: {
-        enabled: true, // Para testing en desarrollo
-        type: 'module'
+        enabled: false // Desactivado en desarrollo para evitar confusión
       }
     })
   ],
   build: {
-    //Optimizaciones para app stores
     target: 'es2015',
     cssCodeSplit: true,
     sourcemap: false,
@@ -95,4 +150,3 @@ export default defineConfig({
     }
   }
 })
-
