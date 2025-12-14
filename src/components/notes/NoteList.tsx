@@ -47,7 +47,7 @@ export default function NoteList({
     const allSelected = selectedCount === notes.length
 
     return (
-        <div className="mt-6 space-y-4">
+        <div className="mt-6 space-y-3">
             {/* Barra de selección múltiple */}
             <AnimatePresence>
                 {selectionMode.isActive && (
@@ -55,13 +55,13 @@ export default function NoteList({
                         initial={{ opacity: 0, y: -20, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                        className="sticky top-20 z-30 bg-blue-50 border border-blue-200 rounded-xl p-4 shadow-sm"
+                        className="sticky top-20 z-30 bg-gray-50 border border-gray-200 rounded-xl p-4 shadow-sm"
                     >
                         <div className="space-y-3">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
-                                    <CircleCheck className="w-5 h-5 text-blue-600" />
-                                    <span className="font-medium text-blue-800">
+                                    <CircleCheck className="w-5 h-5 text-gray-600" />
+                                    <span className="font-medium text-gray-700">
                                         {selectedCount === 0
                                             ? 'Seleccionar notas'
                                             : `${selectedCount} de ${notes.length}`

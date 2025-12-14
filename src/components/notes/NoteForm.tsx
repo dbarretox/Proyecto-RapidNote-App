@@ -1,6 +1,6 @@
 import type { Category } from "@/types"
 import { motion } from "framer-motion"
-import { Save, Plus, Type, FileText } from "lucide-react"
+import { Save, Plus } from "lucide-react"
 import { useRef, useEffect } from "react"
 import { CategorySelector } from "../categories"
 
@@ -68,37 +68,27 @@ export default function NoteForm({
     return (
         <div className="space-y-4">
             {/* Input de título */}
-            <div className="relative">
-                <div className="absolute left-4 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400">
-                    <Type className="w-5 h-5" />
-                </div>
-                <input
-                    ref={titleRef}
-                    type="text"
-                    placeholder="Título de la nota"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    className="w-full pl-12 pr-4 py-4 text-lg font-semibold bg-white border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all placeholder-gray-400"
-                    autoComplete="off"
-                />
-            </div>
+            <input
+                ref={titleRef}
+                type="text"
+                placeholder="Título de la nota"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="w-full px-4 py-4 text-lg font-semibold bg-white border border-gray-100 rounded-xl focus:border-blue-400 outline-none transition-all placeholder-gray-400"
+                autoComplete="off"
+            />
 
             {/* Textarea de contenido */}
-            <div className="relative">
-                <div className="absolute left-4 top-4 pointer-events-none text-gray-400">
-                    <FileText className="w-5 h-5" />
-                </div>
-                <textarea
-                    ref={contentRef}
-                    placeholder="Escribe tu nota aquí..."
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    className="w-full pl-12 pr-4 py-4 text-base leading-relaxed bg-white border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all placeholder-gray-400 resize-none min-h-[120px]"
-                    rows={4}
-                />
-            </div>
+            <textarea
+                ref={contentRef}
+                placeholder="¿Qué tienes en mente?"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="w-full px-4 py-4 text-base leading-relaxed bg-white border border-gray-100 rounded-xl focus:border-blue-400 outline-none transition-all placeholder-gray-400 resize-none min-h-[100px]"
+                rows={4}
+            />
 
             {/* Selector de categorías */}
             <div>
@@ -131,7 +121,7 @@ export default function NoteForm({
                 className={`w-full py-4 rounded-xl font-semibold text-base flex items-center justify-center gap-2 transition-all ${
                     isDisabled
                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        : 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 shadow-lg shadow-blue-500/25'
+                        : 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 shadow-md shadow-blue-500/25'
                 }`}
                 whileTap={!isDisabled ? { scale: 0.98 } : {}}
             >
