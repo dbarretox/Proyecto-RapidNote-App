@@ -13,9 +13,9 @@ interface BottomNavProps {
 }
 
 const navItems = [
-    { id: 'notes' as const, icon: LayoutGrid, label: 'Notas', color: 'from-blue-500 to-blue-600' },
-    { id: 'search' as const, icon: Search, label: 'Buscar', color: 'from-purple-500 to-purple-600' },
-    { id: 'categories' as const, icon: Folder, label: 'Carpetas', color: 'from-orange-500 to-orange-600' },
+    { id: 'notes' as const, icon: LayoutGrid, label: 'Notas' },
+    { id: 'search' as const, icon: Search, label: 'Buscar' },
+    { id: 'categories' as const, icon: Folder, label: 'Carpetas' },
 ]
 
 export default function BottomNav({
@@ -68,7 +68,7 @@ export default function BottomNav({
                                     <AnimatePresence>
                                         {isActive && (
                                             <motion.div
-                                                className={`absolute inset-1 bg-gradient-to-br ${item.color} rounded-2xl`}
+                                                className="absolute inset-1 bg-blue-500 rounded-2xl"
                                                 layoutId="activeTab"
                                                 initial={{ opacity: 0, scale: 0.8 }}
                                                 animate={{ opacity: 1, scale: 1 }}
@@ -102,10 +102,8 @@ export default function BottomNav({
                             whileTap={{ scale: 0.95 }}
                         >
                             <motion.div
-                                className={`relative w-14 h-14 rounded-2xl flex items-center justify-center ${
-                                    activeTab === 'add'
-                                        ? 'bg-gradient-to-br from-cyan-400 via-blue-500 to-violet-600'
-                                        : 'bg-gradient-to-br from-cyan-400 via-blue-500 to-violet-600 opacity-80'
+                                className={`relative w-14 h-14 rounded-2xl flex items-center justify-center bg-blue-500 ${
+                                    activeTab === 'add' ? '' : 'opacity-80'
                                 }`}
                                 animate={{
                                     boxShadow: activeTab === 'add'
@@ -133,7 +131,7 @@ export default function BottomNav({
                                 )}
                             </motion.div>
                             <span className={`text-[10px] font-bold uppercase tracking-wide mt-1 ${
-                                activeTab === 'add' ? 'text-cyan-400' : 'text-gray-400'
+                                activeTab === 'add' ? 'text-blue-400' : 'text-gray-400'
                             }`}>
                                 {editingId ? 'Editar' : 'Nuevo'}
                             </span>
