@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Menu, Search, Plus, Tag } from 'lucide-react'
+import { Menu, Search, Plus, Tag, PenLine } from 'lucide-react'
 import type { SelectionMode } from '@/types'
 
 interface BottomNavProps {
@@ -44,18 +44,10 @@ export default function BottomNav({
     }
 
     return (
-        <motion.nav
-            className="fixed bottom-0 left-0 right-0 glass-strong safe-area-bottom z-50"
-            initial={{ y: 100 }}
-            animate={{ y: 0 }}
-            transition={{ type: "spring", stiffness: 400, damping: 40 }}
-        >
-            {/* Línea decorativa superior */}
-            <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
-
-            <div className="px-4 pt-2 pb-4">
+        <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 safe-area-bottom z-50">
+            <div className="px-2 pt-2 pb-3">
                 <div className="max-w-lg mx-auto">
-                    <div className="flex justify-around items-end relative">
+                    <div className="flex justify-around items-center">
                         {/* Items de navegación regulares */}
                         {navItems.map((item) => {
                             const Icon = item.icon
@@ -64,86 +56,49 @@ export default function BottomNav({
                                 <motion.button
                                     key={item.id}
                                     onClick={() => handleTabClick(item.id)}
-                                    className={`relative flex flex-col items-center py-2 px-4 rounded-2xl transition-all duration-200 ${
+                                    className={`flex flex-col items-center py-2 px-3 rounded-xl transition-colors min-w-[64px] ${
                                         isActive
-                                            ? 'text-blue-600'
-                                            : 'text-gray-400 hover:text-gray-600'
+                                            ? 'text-blue-600 bg-blue-50'
+                                            : 'text-gray-400'
                                     }`}
-                                    whileTap={{ scale: 0.92 }}
+                                    whileTap={{ scale: 0.95 }}
                                 >
-                                    {/* Indicador de fondo activo */}
-                                    {isActive && (
-                                        <motion.div
-                                            layoutId="navIndicator"
-                                            className="absolute inset-0 bg-blue-50 rounded-2xl"
-                                            initial={false}
-                                            transition={{
-                                                type: "spring",
-                                                stiffness: 500,
-                                                damping: 35
-                                            }}
-                                        />
-                                    )}
-                                    <div className="relative z-10">
-                                        <Icon className={`w-6 h-6 mb-1 transition-transform duration-200 ${
-                                            isActive ? 'scale-110' : ''
-                                        }`} />
-                                        <span className={`text-xs font-medium ${
-                                            isActive ? 'font-semibold' : ''
-                                        }`}>
-                                            {item.label}
-                                        </span>
-                                    </div>
+                                    <Icon className="w-6 h-6 mb-1" />
+                                    <span className={`text-xs ${isActive ? 'font-semibold' : 'font-medium'}`}>
+                                        {item.label}
+                                    </span>
                                 </motion.button>
                             )
                         })}
 
-                        {/* Botón FAB de crear/editar */}
+                        {/* Botón de crear/editar */}
                         <motion.button
                             onClick={() => handleTabClick('add')}
-                            className="flex flex-col items-center relative"
-                            whileHover={{ scale: 1.05 }}
+                            className={`flex flex-col items-center py-2 px-3 rounded-xl transition-colors min-w-[64px] ${
+                                activeTab === 'add'
+                                    ? 'text-blue-600 bg-blue-50'
+                                    : 'text-gray-400'
+                            }`}
                             whileTap={{ scale: 0.95 }}
                         >
-                            <motion.div
-                                className={`relative w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition-all duration-300 ${
-                                    activeTab === 'add'
-                                        ? 'bg-gradient-to-br from-blue-500 to-blue-600 shadow-blue-500/40 ring-4 ring-blue-100'
-                                        : 'bg-gradient-to-br from-blue-500 to-blue-600 shadow-blue-500/30'
-                                }`}
-                                animate={{
-                                    rotate: activeTab === 'add' ? 45 : 0,
-                                }}
-                                transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                            >
-                                <Plus className="w-6 h-6 text-white" />
-                            </motion.div>
-                            <span className={`text-xs font-medium mt-1 transition-colors ${
-                                activeTab === 'add' ? 'text-blue-600 font-semibold' : 'text-gray-500'
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-1 ${
+                                activeTab === 'add'
+                                    ? 'bg-blue-600 shadow-lg shadow-blue-500/30'
+                                    : 'bg-blue-600 shadow-md shadow-blue-500/20'
                             }`}>
-                                {editingId ? 'Editar' : 'Crear'}
+                                {editingId ? (
+                                    <PenLine className="w-5 h-5 text-white" />
+                                ) : (
+                                    <Plus className="w-6 h-6 text-white" />
+                                )}
+                            </div>
+                            <span className={`text-xs ${activeTab === 'add' ? 'font-semibold text-blue-600' : 'font-medium text-gray-500'}`}>
+                                {editingId ? 'Editando' : 'Crear'}
                             </span>
-
-                            {/* Pulse animado cuando está activo */}
-                            {activeTab === 'add' && (
-                                <motion.div
-                                    className="absolute top-0 w-12 h-12 rounded-2xl bg-blue-400"
-                                    initial={{ opacity: 0.4, scale: 1 }}
-                                    animate={{
-                                        opacity: 0,
-                                        scale: 1.5,
-                                    }}
-                                    transition={{
-                                        duration: 1.5,
-                                        repeat: Infinity,
-                                        ease: "easeOut"
-                                    }}
-                                />
-                            )}
                         </motion.button>
                     </div>
                 </div>
             </div>
-        </motion.nav>
+        </nav>
     )
 }
