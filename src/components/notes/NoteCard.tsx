@@ -127,10 +127,11 @@ export default function NoteCard({
                 layout
                 {...(!selectionMode.isActive && {
                     drag: "x",
-                    dragConstraints: { left: 0, right: 0 },
-                    dragElastic: 0.7,
+                    dragConstraints: { left: -150, right: 150 },
+                    dragSnapToOrigin: true,
+                    dragElastic: 0.2,
                     onDragEnd: handleDragEnd,
-                    style: { x, boxShadow: '0 2px 12px -4px rgba(0, 0, 0, 0.08), 0 4px 20px -8px rgba(0, 0, 0, 0.1)' }
+                    style: { x, touchAction: "pan-y", boxShadow: '0 2px 12px -4px rgba(0, 0, 0, 0.08), 0 4px 20px -8px rgba(0, 0, 0, 0.1)' }
                 })}
             >
             {/* Indicador de favorito (barra lateral) */}
