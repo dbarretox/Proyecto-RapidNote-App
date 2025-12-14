@@ -1,6 +1,5 @@
-import { Button } from "../ui"
 import { InstallPrompt } from "../install"
-import { X, CheckSquare, StickyNote } from "lucide-react"
+import { X, CheckSquare, Zap } from "lucide-react"
 import { motion } from "framer-motion"
 import type { SelectionMode } from "@/types"
 
@@ -21,29 +20,57 @@ export default function Header({
 }: HeaderProps) {
     return (
         <motion.header
-            className="bg-white border-b border-gray-100 sticky top-0 z-40 safe-area-top"
+            className="relative overflow-hidden sticky top-0 z-40 safe-area-top"
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
         >
-            <div className="px-4 py-3">
+            {/* Fondo con gradiente animado */}
+            <div className="absolute inset-0 bg-gradient-to-r from-violet-600 via-blue-600 to-cyan-500" />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-transparent" />
+
+            {/* Patrón decorativo */}
+            <div className="absolute inset-0 opacity-10">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full blur-3xl transform translate-x-16 -translate-y-16" />
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full blur-2xl transform -translate-x-12 translate-y-12" />
+            </div>
+
+            <div className="relative px-4 py-4">
                 <div className="flex items-center justify-between max-w-lg mx-auto">
                     {/* Logo y título */}
                     <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md">
-                            <StickyNote className="w-5 h-5 text-white" />
-                        </div>
+                        <motion.div
+                            className="relative"
+                            whileHover={{ scale: 1.05, rotate: -5 }}
+                            whileTap={{ scale: 0.95 }}
+                        >
+                            {/* Icono con efecto glow */}
+                            <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/30 shadow-lg shadow-black/10">
+                                <Zap className="w-6 h-6 text-white" fill="currentColor" />
+                            </div>
+                            {/* Indicador de actividad */}
+                            <motion.div
+                                className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white"
+                                animate={{ scale: [1, 1.2, 1] }}
+                                transition={{ duration: 2, repeat: Infinity }}
+                            />
+                        </motion.div>
+
                         <div>
-                            <h1 className="text-xl font-bold text-gray-900">RapidNote</h1>
-                            {notes.length > 0 && (
-                                <p className="text-xs text-gray-500">
-                                    {notes.length} nota{notes.length !== 1 ? 's' : ''}
+                            <h1 className="text-2xl font-black text-white tracking-tight">
+                                Rapid<span className="text-cyan-300">Note</span>
+                            </h1>
+                            {notes.length > 0 ? (
+                                <p className="text-xs text-white/70 font-medium">
+                                    {notes.length} nota{notes.length !== 1 ? 's' : ''} guardada{notes.length !== 1 ? 's' : ''}
                                     {selectionMode.isActive && selectionMode.selectedIds.size > 0 && (
-                                        <span className="text-blue-600 font-medium">
-                                            {' '}• {selectionMode.selectedIds.size} seleccionada{selectionMode.selectedIds.size !== 1 ? 's' : ''}
+                                        <span className="text-cyan-300 ml-1">
+                                            • {selectionMode.selectedIds.size} seleccionada{selectionMode.selectedIds.size !== 1 ? 's' : ''}
                                         </span>
                                     )}
                                 </p>
+                            ) : (
+                                <p className="text-xs text-white/70 font-medium">Tu espacio de ideas</p>
                             )}
                         </div>
                     </div>
@@ -51,23 +78,31 @@ export default function Header({
                     {/* Acciones */}
                     <div className="flex items-center gap-2">
                         {notes.length > 0 && activeTab === 'notes' && (
-                            <Button
-                                variant="toggle"
-                                isActive={selectionMode.isActive}
+                            <motion.button
                                 onClick={selectionMode.isActive ? onCancelSelection : onToggleSelection}
+                                className={`p-3 rounded-xl transition-all ${
+                                    selectionMode.isActive
+                                        ? 'bg-white text-violet-600'
+                                        : 'bg-white/20 text-white border border-white/30'
+                                }`}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
                             >
                                 {selectionMode.isActive ? (
                                     <X className="w-5 h-5" />
                                 ) : (
                                     <CheckSquare className="w-5 h-5" />
                                 )}
-                            </Button>
+                            </motion.button>
                         )}
 
                         <InstallPrompt />
                     </div>
                 </div>
             </div>
+
+            {/* Borde inferior con efecto */}
+            <div className="h-1 bg-gradient-to-r from-cyan-400 via-blue-400 to-violet-400" />
         </motion.header>
     )
 }
