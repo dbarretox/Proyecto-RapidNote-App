@@ -394,23 +394,27 @@ function App() {
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="text-center py-12"
+                  className="text-center py-16"
                 >
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Edit3 className="w-8 h-8 text-gray-400" />
-                  </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Sin notas aún</h3>
-                  <p className="text-gray-500 mb-6">Crea tu primera nota tocando el botón +</p>
+                  <motion.div
+                    className="w-20 h-20 bg-gradient-to-br from-blue-100 to-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/10"
+                    animate={{ y: [0, -8, 0] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <Edit3 className="w-10 h-10 text-blue-500" />
+                  </motion.div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Sin notas aún</h3>
+                  <p className="text-gray-500 mb-8 max-w-xs mx-auto">Comienza a organizar tus ideas creando tu primera nota</p>
                   <motion.button
                     onClick={() => {
                       setEditingCategoryId(selectedCategoryId)
                       setActiveTab('add')
                     }}
-                    className="px-6 py-3 bg-blue-600 text-white rounded-xl font-medium shadow-lg"
-                    whileHover={{ scale: 1.02 }}
+                    className="px-8 py-4 btn-primary text-white rounded-2xl font-semibold"
+                    whileHover={{ scale: 1.02, y: -2 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    Crear nota
+                    Crear primera nota
                   </motion.button>
                 </motion.div>
               )}
@@ -538,20 +542,24 @@ function App() {
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="text-center py-12"
+                  className="text-center py-16"
                 >
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Tag className="w-8 h-8 text-gray-400" />
-                  </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Sin categorías</h3>
-                  <p className="text-gray-500 mb-6">Crea tu primera categoría para organizar tus notas</p>
+                  <motion.div
+                    className="w-20 h-20 bg-gradient-to-br from-purple-100 to-pink-50 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-purple-500/10"
+                    animate={{ rotate: [0, 5, -5, 0] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <Tag className="w-10 h-10 text-purple-500" />
+                  </motion.div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Sin categorías</h3>
+                  <p className="text-gray-500 mb-8 max-w-xs mx-auto">Organiza mejor tus notas creando categorías personalizadas</p>
                   <motion.button
                     onClick={() => setShowCategoryForm(true)}
-                    className="px-6 py-3 bg-blue-600 text-white rounded-xl font-medium shadow-lg"
-                    whileHover={{ scale: 1.02 }}
+                    className="px-8 py-4 btn-primary text-white rounded-2xl font-semibold"
+                    whileHover={{ scale: 1.02, y: -2 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    Crear categoría
+                    Crear primera categoría
                   </motion.button>
                 </motion.div>
               )}

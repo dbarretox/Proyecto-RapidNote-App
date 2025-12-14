@@ -16,16 +16,16 @@ type Props = {
     onSave: () => void
 }
 
-export default function NoteForm({ 
-    title, 
-    setTitle, 
-    content, 
-    setContent, 
-    editingId, 
+export default function NoteForm({
+    title,
+    setTitle,
+    content,
+    setContent,
+    editingId,
     categories,
     selectedCategoryId,
     onCategoryChange,
-    onSave 
+    onSave
 }: Props) {
     const titleRef = useRef<HTMLInputElement>(null)
     const contentRef = useRef<HTMLTextAreaElement>(null)
@@ -33,7 +33,10 @@ export default function NoteForm({
     // Auto-focus en título al crear nueva nota
     useEffect(() => {
         if (!editingId && titleRef.current) {
-            titleRef.current.focus()
+            // Pequeño delay para evitar problemas con el teclado móvil
+            setTimeout(() => {
+                titleRef.current?.focus()
+            }, 100)
         }
     }, [editingId])
 
@@ -47,7 +50,6 @@ export default function NoteForm({
     }, [content])
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
-        // Guardar con Cmd/Ctrl + Enter
         if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
             e.preventDefault()
             handleSave()
@@ -56,7 +58,6 @@ export default function NoteForm({
 
     const handleSave = () => {
         if (!title.trim() && !content.trim()) {
-            // Mostrar feedback visual o toast aquí si quieres
             return
         }
         onSave()
@@ -65,16 +66,11 @@ export default function NoteForm({
     const isDisabled = !title.trim() && !content.trim()
 
     return (
-        <motion.div
-            className="space-y-4"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-        >
+        <div className="space-y-4">
             {/* Input de título */}
             <div className="relative">
-                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                    <Type className="w-5 h-5 text-gray-400" />
+                <div className="absolute left-4 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400">
+                    <Type className="w-5 h-5" />
                 </div>
                 <input
                     ref={titleRef}
@@ -83,15 +79,15 @@ export default function NoteForm({
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    className="w-full pl-12 pr-4 py-4 text-lg font-medium border-2 border-gray-200 rounded-xl bg-white focus:border-blue-500 focus:ring-0 outline-none transition-colors placeholder-gray-400"
+                    className="w-full pl-12 pr-4 py-4 text-lg font-semibold bg-white border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all placeholder-gray-400"
                     autoComplete="off"
                 />
             </div>
 
             {/* Textarea de contenido */}
             <div className="relative">
-                <div className="absolute left-3 top-4 pointer-events-none">
-                    <FileText className="w-5 h-5 text-gray-400" />
+                <div className="absolute left-4 top-4 pointer-events-none text-gray-400">
+                    <FileText className="w-5 h-5" />
                 </div>
                 <textarea
                     ref={contentRef}
@@ -99,14 +95,14 @@ export default function NoteForm({
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    className="w-full pl-12 pr-4 py-4 text-base leading-relaxed border-2 border-gray-200 rounded-xl bg-white focus:border-blue-500 focus:ring-0 outline-none transition-colors placeholder-gray-400 resize-none min-h-[120px]"
+                    className="w-full pl-12 pr-4 py-4 text-base leading-relaxed bg-white border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all placeholder-gray-400 resize-none min-h-[120px]"
                     rows={4}
                 />
             </div>
 
             {/* Selector de categorías */}
-            <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
+            <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Categoría
                 </label>
                 <CategorySelector
@@ -117,30 +113,27 @@ export default function NoteForm({
             </div>
 
             {/* Contador de caracteres */}
-            <div className="flex justify-between items-center text-xs text-gray-500">
-                <div className="flex gap-4">
+            {(title.length > 0 || content.length > 0) && (
+                <div className="flex gap-4 text-xs text-gray-400 px-1">
                     {title.length > 0 && (
-                        <span>Título: {title.length} caracteres</span>
+                        <span>Título: <span className="text-gray-500 font-medium">{title.length}</span></span>
                     )}
                     {content.length > 0 && (
-                        <span>Contenido: {content.length} caracteres</span>
+                        <span>Contenido: <span className="text-gray-500 font-medium">{content.length}</span></span>
                     )}
                 </div>
-            </div>
+            )}
 
             {/* Botón de guardar */}
             <motion.button
                 onClick={handleSave}
                 disabled={isDisabled}
-                className={`w-full py-4 rounded-xl font-semibold text-base flex items-center justify-center gap-3 transition-all ${isDisabled
+                className={`w-full py-4 rounded-xl font-semibold text-base flex items-center justify-center gap-2 transition-all ${
+                    isDisabled
                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        : 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 shadow-lg hover:shadow-xl'
-                    }`}
-                whileHover={!isDisabled ? { scale: 1.02 } : {}}
+                        : 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 shadow-lg shadow-blue-500/25'
+                }`}
                 whileTap={!isDisabled ? { scale: 0.98 } : {}}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
             >
                 {editingId ? (
                     <>
@@ -155,26 +148,10 @@ export default function NoteForm({
                 )}
             </motion.button>
 
-            {/* Ayuda de teclado */}
-            <motion.div
-                className="text-center text-xs text-gray-400"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
-            >
+            {/* Atajo de teclado */}
+            <p className="text-center text-xs text-gray-400">
                 {navigator.platform.includes('Mac') ? 'Cmd' : 'Ctrl'} + Enter para guardar rápido
-            </motion.div>
-
-            {/* Mensaje de estado */}
-            {isDisabled && (title.length > 0 || content.length > 0) && (
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="text-center text-sm text-gray-500 bg-gray-50 py-3 px-4 rounded-xl"
-                >
-                    ✍️ Sigue escribiendo para poder guardar la nota
-                </motion.div>
-            )}
-        </motion.div>
+            </p>
+        </div>
     )
 }
