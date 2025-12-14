@@ -93,48 +93,7 @@ export default function NoteCard({
         : null
 
     return (
-        <div className="note-card-container relative rounded-2xl" data-note-id={note.id}>
-            {/* Fondo de eliminar (rojo) - visible al swipear izquierda */}
-            <motion.div
-                className="absolute inset-0 bg-red-500 flex items-center justify-end pr-6 rounded-2xl"
-                style={{ opacity: deleteIconOpacity }}
-            >
-                <Trash2 className="w-6 h-6 text-white" />
-            </motion.div>
 
-            {/* Fondo de favorito (amarillo) - visible al swipear derecha */}
-            <motion.div
-                className="absolute inset-0 bg-amber-400 flex items-center justify-start pl-6 rounded-2xl"
-                style={{ opacity: favoriteIconOpacity }}
-            >
-                <Star className="w-6 h-6 text-white" fill="white" />
-            </motion.div>
-
-            {/* Card */}
-            <motion.article
-                className={`relative overflow-hidden rounded-2xl transition-all duration-300 bg-white border border-gray-100 ${
-                    isSelected ? 'ring-2 ring-blue-500 ring-offset-2' : ''
-                } ${selectionMode.isActive ? 'cursor-pointer' : ''}`}
-                style={{
-                    boxShadow: '0 2px 12px -4px rgba(0, 0, 0, 0.08), 0 4px 20px -8px rgba(0, 0, 0, 0.1)'
-                }}
-                onClick={() => selectionMode.isActive && onToggleSelection(note.id)}
-                whileHover={{
-                    scale: selectionMode.isActive ? 1.01 : 1,
-                    boxShadow: '0 8px 30px -4px rgba(0, 0, 0, 0.12), 0 8px 24px -8px rgba(0, 0, 0, 0.15)'
-                }}
-                whileTap={{ scale: selectionMode.isActive ? 0.98 : 1 }}
-                layout
-                {...(!selectionMode.isActive && {
-                    drag: "x",
-                    dragConstraints: { left: -150, right: 150 },
-                    dragSnapToOrigin: true,
-                    dragElastic: 0.5,
-                    onDragEnd: handleDragEnd,
-                    whileDrag: { scale: 1.02, cursor: "grabbing" },
-                    style: { x, touchAction: "pan-y", boxShadow: '0 2px 12px -4px rgba(0, 0, 0, 0.08), 0 4px 20px -8px rgba(0, 0, 0, 0.1)' }
-                })}
-            >
             {/* Indicador de favorito (barra lateral) */}
             {note.isFavorite && (
                 <motion.div
@@ -239,10 +198,7 @@ export default function NoteCard({
                             e.stopPropagation()
                             onToggleFavorite(note.id)
                         }}
-                        className={`p-2 rounded-lg self-start ${
-                            note.isFavorite
-                                ? 'text-amber-400'
-                                : 'text-gray-300 hover:text-amber-400'
+
                         }`}
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
@@ -284,30 +240,7 @@ export default function NoteCard({
 
                 {/* Botones de acción */}
                 {!selectionMode.isActive && (
-                    <div className="flex items-center gap-4 pt-2 border-t border-gray-100/80">
-                        <motion.button
-                            onClick={(e) => {
-                                e.stopPropagation()
-                                onEdit(note)
-                            }}
-                            className="flex items-center gap-1.5 text-gray-500 hover:text-blue-600 text-sm transition-colors"
-                            whileTap={{ scale: 0.95 }}
-                        >
-                            <Pencil className="w-4 h-4" />
-                            <span>Editar</span>
-                        </motion.button>
 
-                        <motion.button
-                            onClick={(e) => {
-                                e.stopPropagation()
-                                setShowDeleteConfirm(true)
-                            }}
-                            className="flex items-center gap-1.5 text-gray-400 hover:text-red-500 text-sm transition-colors"
-                            whileTap={{ scale: 0.95 }}
-                        >
-                            <Trash2 className="w-4 h-4" />
-                            <span>Eliminar</span>
-                        </motion.button>
                     </div>
                 )}
             </div>
@@ -325,7 +258,6 @@ export default function NoteCard({
                 }}
                 onCancel={() => setShowDeleteConfirm(false)}
             />
-            </motion.article>
-        </div>
+
     )
 }

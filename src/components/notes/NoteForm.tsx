@@ -68,27 +68,7 @@ export default function NoteForm({
     return (
         <div className="space-y-4">
             {/* Input de título */}
-            <input
-                ref={titleRef}
-                type="text"
-                placeholder="Título de la nota"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                onKeyDown={handleKeyDown}
-                className="w-full px-4 py-4 text-lg font-semibold bg-white border border-gray-100 rounded-xl focus:border-blue-400 outline-none transition-all placeholder-gray-400"
-                autoComplete="off"
-            />
 
-            {/* Textarea de contenido */}
-            <textarea
-                ref={contentRef}
-                placeholder="¿Qué tienes en mente?"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                onKeyDown={handleKeyDown}
-                className="w-full px-4 py-4 text-base leading-relaxed bg-white border border-gray-100 rounded-xl focus:border-blue-400 outline-none transition-all placeholder-gray-400 resize-none min-h-[100px]"
-                rows={4}
-            />
 
             {/* Selector de categorías */}
             <div>
@@ -121,7 +101,7 @@ export default function NoteForm({
                 className={`w-full py-4 rounded-xl font-semibold text-base flex items-center justify-center gap-2 transition-all ${
                     isDisabled
                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        : 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 shadow-md shadow-blue-500/25'
+
                 }`}
                 whileTap={!isDisabled ? { scale: 0.98 } : {}}
             >

@@ -13,9 +13,7 @@ interface BottomNavProps {
 }
 
 const navItems = [
-    { id: 'notes' as const, icon: LayoutGrid, label: 'Notas' },
-    { id: 'search' as const, icon: Search, label: 'Buscar' },
-    { id: 'categories' as const, icon: Folder, label: 'Carpetas' },
+
 ]
 
 export default function BottomNav({
@@ -68,7 +66,7 @@ export default function BottomNav({
                                     <AnimatePresence>
                                         {isActive && (
                                             <motion.div
-                                                className="absolute inset-1 bg-blue-500 rounded-2xl"
+
                                                 layoutId="activeTab"
                                                 initial={{ opacity: 0, scale: 0.8 }}
                                                 animate={{ opacity: 1, scale: 1 }}
@@ -102,8 +100,7 @@ export default function BottomNav({
                             whileTap={{ scale: 0.95 }}
                         >
                             <motion.div
-                                className={`relative w-14 h-14 rounded-2xl flex items-center justify-center bg-blue-500 ${
-                                    activeTab === 'add' ? '' : 'opacity-80'
+
                                 }`}
                                 animate={{
                                     boxShadow: activeTab === 'add'
@@ -131,7 +128,7 @@ export default function BottomNav({
                                 )}
                             </motion.div>
                             <span className={`text-[10px] font-bold uppercase tracking-wide mt-1 ${
-                                activeTab === 'add' ? 'text-blue-400' : 'text-gray-400'
+
                             }`}>
                                 {editingId ? 'Editar' : 'Nuevo'}
                             </span>

@@ -25,8 +25,6 @@ export default function Header({
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
         >
-            {/* Fondo con gradiente */}
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-500" />
             <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-transparent" />
 
             {/* Patrón decorativo */}
@@ -82,7 +80,7 @@ export default function Header({
                                 onClick={selectionMode.isActive ? onCancelSelection : onToggleSelection}
                                 className={`p-3 rounded-xl transition-all ${
                                     selectionMode.isActive
-                                        ? 'bg-white text-blue-600'
+
                                         : 'bg-white/20 text-white border border-white/30'
                                 }`}
                                 whileHover={{ scale: 1.05 }}
@@ -102,7 +100,7 @@ export default function Header({
             </div>
 
             {/* Borde inferior con efecto */}
-            <div className="h-1 bg-gradient-to-r from-cyan-400 to-blue-500" />
+in
         </motion.header>
     )
 }
