@@ -93,7 +93,7 @@ export default function NoteCard({
         : null
 
     return (
-        <div className="note-card-container relative overflow-hidden rounded-2xl" data-note-id={note.id}>
+        <div className="note-card-container relative rounded-2xl" data-note-id={note.id}>
             {/* Fondo de eliminar (rojo) - visible al swipear izquierda */}
             <motion.div
                 className="absolute inset-0 bg-red-500 flex items-center justify-end pr-6 rounded-2xl"
@@ -129,8 +129,9 @@ export default function NoteCard({
                     drag: "x",
                     dragConstraints: { left: -150, right: 150 },
                     dragSnapToOrigin: true,
-                    dragElastic: 0.2,
+                    dragElastic: 0.5,
                     onDragEnd: handleDragEnd,
+                    whileDrag: { scale: 1.02, cursor: "grabbing" },
                     style: { x, touchAction: "pan-y", boxShadow: '0 2px 12px -4px rgba(0, 0, 0, 0.08), 0 4px 20px -8px rgba(0, 0, 0, 0.1)' }
                 })}
             >
