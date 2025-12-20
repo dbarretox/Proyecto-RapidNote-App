@@ -6,6 +6,7 @@ export interface Note {
     createdAt?: number
     updatedAt?: number
     categoryId?: string | null
+    deletedAt?: number | null
 }
 
 export interface SelectionMode {
@@ -36,12 +37,13 @@ export type SortBy = 'date' | 'favorite' | 'updated'
 export type SortOrder = 'asc' | 'desc'
 
 // Tipo para las pestañas
-export type ActiveTab = 'notes' | 'search' | 'add' | 'categories'
+export type ActiveTab = 'notes' | 'search' | 'add' | 'categories' | 'trash'
 
 // Tipo para el contexto de notas
 export interface NotesContextType {
     // Estado
     notes: Note[]
+    trashNotes: Note[]
     categories: Category[]
     isReady: boolean
     selectedIds: Set<string>
@@ -59,6 +61,11 @@ export interface NotesContextType {
     deleteNote: (id: string) => void
     deleteMultiple: (ids: string[]) => void
     toggleFavorite: (id: string) => void
+
+    // Acciones papelera
+    restoreFromTrash: (id: string) => void
+    permanentlyDelete: (id: string) => void
+    emptyTrash: () => void
 
     // Acciones categorías
     addCategory: (category: Omit<Category, 'id' | 'createdAt'>) => void

@@ -1,12 +1,12 @@
 import { Button } from "../ui"
 import { InstallPrompt } from "../install"
 import { X, CheckSquare } from "lucide-react"
-import type { SelectionMode } from "@/types"
+import type { SelectionMode, ActiveTab } from "@/types"
 
 interface HeaderProps {
     notes: Array<{ id: string }>
     selectionMode: SelectionMode
-    activeTab: 'notes' | 'search' | 'add' | 'categories'
+    activeTab: ActiveTab
     onToggleSelection: () => void
     onCancelSelection: () => void
 }

@@ -1,6 +1,6 @@
 import { useState } from "react"
 import type { Note, Category, ActiveTab } from "@/types"
-import { NoteList, NoteForm } from "@/components/notes"
+import { NoteList, NoteForm, TrashList } from "@/components/notes"
 import { SearchBar, SortControls } from "@/components/controls"
 import { motion } from "framer-motion"
 import { Star, Search, Edit3, FileText, Tag } from "lucide-react"
@@ -13,6 +13,7 @@ import { NotesProvider, ToastProvider, useNotes } from "@/contexts"
 function AppContent() {
   const {
     notes,
+    trashNotes,
     categories,
     filteredNotes,
     selectedIds,
@@ -27,6 +28,9 @@ function AppContent() {
     deleteNote,
     deleteMultiple,
     toggleFavorite,
+    restoreFromTrash,
+    permanentlyDelete,
+    emptyTrash,
     addCategory,
     updateCategory,
     deleteCategory,
@@ -278,6 +282,20 @@ function AppContent() {
               )}
             </motion.div>
           )}
+
+          {activeTab === 'trash' && (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold text-gray-900">Papelera</h2>
+              </div>
+              <TrashList
+                notes={trashNotes}
+                onRestore={restoreFromTrash}
+                onDelete={permanentlyDelete}
+                onEmptyTrash={emptyTrash}
+              />
+            </motion.div>
+          )}
         </div>
       </div>
 
@@ -285,6 +303,7 @@ function AppContent() {
         activeTab={activeTab}
         editingId={editingId}
         selectionMode={selectionMode}
+        trashCount={trashNotes.length}
         onTabChange={setActiveTab}
         onCancelEdit={() => { setEditingId(null); setTitle(""); setContent(""); setEditingCategoryId(null) }}
         onCancelSelection={exitSelectionMode}
@@ -293,9 +312,9 @@ function AppContent() {
 
       <ConfirmDialog
         isOpen={showDeleteAllConfirm}
-        title="Eliminar notas seleccionadas"
-        message={`¿Estás seguro de que quieres eliminar ${selectedIds.size} nota${selectedIds.size === 1 ? '' : 's'}? Esta acción no se puede deshacer.`}
-        confirmText="Eliminar todas"
+        title="Mover a papelera"
+        message={`¿Mover ${selectedIds.size} nota${selectedIds.size === 1 ? '' : 's'} a la papelera?`}
+        confirmText="Mover a papelera"
         cancelText="Cancelar"
         variant="danger"
         onConfirm={confirmDeleteSelected}

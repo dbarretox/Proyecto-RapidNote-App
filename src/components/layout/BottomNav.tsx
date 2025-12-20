@@ -1,12 +1,13 @@
 import { motion } from 'framer-motion'
-import { Menu, Search, Plus, Tag } from 'lucide-react'
-import type { SelectionMode } from '@/types'
+import { Menu, Search, Plus, Tag, Trash2 } from 'lucide-react'
+import type { SelectionMode, ActiveTab } from '@/types'
 
 interface BottomNavProps {
-    activeTab: 'notes' | 'search' | 'add' | 'categories'
+    activeTab: ActiveTab
     editingId: string | null
     selectionMode: SelectionMode
-    onTabChange: (tab: 'notes' | 'search' | 'add' | 'categories') => void
+    trashCount?: number
+    onTabChange: (tab: ActiveTab) => void
     onCancelEdit: () => void
     onCancelSelection: () => void
     onInitializeNewNote: () => void
@@ -16,12 +17,13 @@ export default function BottomNav({
     activeTab,
     editingId,
     selectionMode,
+    trashCount = 0,
     onTabChange,
     onCancelEdit,
     onCancelSelection,
     onInitializeNewNote
 }: BottomNavProps) {
-    const handleTabClick = (tab: 'notes' | 'search' | 'add' | 'categories') => {
+    const handleTabClick = (tab: ActiveTab) => {
         if (selectionMode.isActive) {
             onCancelSelection()
         }
@@ -64,6 +66,21 @@ export default function BottomNav({
                     >
                         <Tag className="w-6 h-6 mb-1" />
                         <span className="text-xs font-medium">Categorías</span>
+                    </motion.button>
+                    <motion.button
+                        onClick={() => handleTabClick('trash')}
+                        className={`flex flex-col items-center py-2 px-4 rounded-lg transition-colors relative ${activeTab === 'trash' ? 'text-blue-600 bg-blue-50' : 'text-gray-500'
+                            }`}
+                    >
+                        <div className="relative">
+                            <Trash2 className="w-6 h-6 mb-1" />
+                            {trashCount > 0 && (
+                                <span className="absolute -top-1 -right-2 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                                    {trashCount > 9 ? '9+' : trashCount}
+                                </span>
+                            )}
+                        </div>
+                        <span className="text-xs font-medium">Papelera</span>
                     </motion.button>
                     <motion.button
                         onClick={() => handleTabClick('add')}

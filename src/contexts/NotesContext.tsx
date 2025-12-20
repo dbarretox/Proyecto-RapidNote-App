@@ -46,7 +46,7 @@ export function NotesProvider({ children }: NotesProviderProps) {
         deletedNotesRef.current = [noteToDelete]
         notesStorage.deleteNote(id)
 
-        showToast('Nota eliminada', 'error', UNDO_DURATION, {
+        showToast('Movida a papelera', 'error', UNDO_DURATION, {
             label: 'Deshacer',
             onClick: () => {
                 notesStorage.restoreNotes(deletedNotesRef.current)
@@ -64,7 +64,7 @@ export function NotesProvider({ children }: NotesProviderProps) {
 
         const count = notesToDelete.length
         showToast(
-            `${count} nota${count === 1 ? '' : 's'} eliminada${count === 1 ? '' : 's'}`,
+            `${count} nota${count === 1 ? '' : 's'} movida${count === 1 ? '' : 's'} a papelera`,
             'error',
             UNDO_DURATION,
             {
@@ -75,6 +75,23 @@ export function NotesProvider({ children }: NotesProviderProps) {
                 }
             }
         )
+    }, [notesStorage, showToast])
+
+    // Acciones de papelera
+    const restoreFromTrash = useCallback((id: string) => {
+        notesStorage.restoreFromTrash(id)
+        showToast('Nota restaurada', 'success')
+    }, [notesStorage, showToast])
+
+    const permanentlyDelete = useCallback((id: string) => {
+        notesStorage.permanentlyDelete(id)
+        showToast('Nota eliminada permanentemente', 'error')
+    }, [notesStorage, showToast])
+
+    const emptyTrash = useCallback(() => {
+        const count = notesStorage.trashNotes.length
+        notesStorage.emptyTrash()
+        showToast(`${count} nota${count === 1 ? '' : 's'} eliminada${count === 1 ? '' : 's'} permanentemente`, 'error')
     }, [notesStorage, showToast])
 
     const toggleFavorite = useCallback((id: string) => {
@@ -139,6 +156,7 @@ export function NotesProvider({ children }: NotesProviderProps) {
     const value: NotesContextType = {
         // Estado
         notes: notesStorage.notes,
+        trashNotes: notesStorage.trashNotes,
         categories: categoriesStorage.categories,
         isReady,
         selectedIds: selection.selectedIds,
@@ -156,6 +174,11 @@ export function NotesProvider({ children }: NotesProviderProps) {
         deleteNote,
         deleteMultiple,
         toggleFavorite,
+
+        // Acciones papelera
+        restoreFromTrash,
+        permanentlyDelete,
+        emptyTrash,
 
         // Acciones categorías
         addCategory: categoriesStorage.addCategory,
