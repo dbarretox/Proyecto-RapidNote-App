@@ -8,10 +8,12 @@ export interface UsePWAUpdateReturn {
     close: () => void
 }
 
+type UpdateSWFn = (reloadPage?: boolean) => Promise<void>
+
 export function usePWAUpdate(): UsePWAUpdateReturn {
     const [needRefresh, setNeedRefresh] = useState(false)
     const [offlineReady, setOfflineReady] = useState(false)
-    const updateSWRef = useRef<((reloadPage?: boolean) => Promise<void>) | null>(null)
+    const updateSWRef = useRef<UpdateSWFn | null>(null)
 
     useEffect(() => {
         const updateServiceWorker = registerSW({
@@ -31,7 +33,9 @@ export function usePWAUpdate(): UsePWAUpdateReturn {
             }
         })
 
-        updateSWRef.current = updateServiceWorker
+        if (typeof updateServiceWorker === 'function') {
+            updateSWRef.current = updateServiceWorker
+        }
     }, [])
 
     const handleUpdate = useCallback(() => {
