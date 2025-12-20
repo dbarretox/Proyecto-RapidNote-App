@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { registerSW } from 'virtual:pwa-register'
 
 export interface UsePWAUpdateReturn {
@@ -11,7 +11,7 @@ export interface UsePWAUpdateReturn {
 export function usePWAUpdate(): UsePWAUpdateReturn {
     const [needRefresh, setNeedRefresh] = useState(false)
     const [offlineReady, setOfflineReady] = useState(false)
-    const [updateSW, setUpdateSW] = useState<((reloadPage?: boolean) => Promise<void>) | null>(null)
+    const updateSWRef = useRef<((reloadPage?: boolean) => Promise<void>) | null>(null)
 
     useEffect(() => {
         const updateServiceWorker = registerSW({
@@ -21,7 +21,7 @@ export function usePWAUpdate(): UsePWAUpdateReturn {
             onOfflineReady() {
                 setOfflineReady(true)
             },
-            onRegisteredSW(swUrl, registration) {
+            onRegisteredSW(_swUrl: string, registration: ServiceWorkerRegistration | undefined) {
                 // Verificar actualizaciones periódicamente (cada hora)
                 if (registration) {
                     setInterval(() => {
@@ -31,14 +31,14 @@ export function usePWAUpdate(): UsePWAUpdateReturn {
             }
         })
 
-        setUpdateSW(() => updateServiceWorker)
+        updateSWRef.current = updateServiceWorker
     }, [])
 
     const handleUpdate = useCallback(() => {
-        if (updateSW) {
-            updateSW(true)
+        if (updateSWRef.current) {
+            updateSWRef.current(true)
         }
-    }, [updateSW])
+    }, [])
 
     const close = useCallback(() => {
         setNeedRefresh(false)
