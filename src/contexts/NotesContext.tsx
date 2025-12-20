@@ -1,9 +1,10 @@
 import { createContext, useContext, useEffect, useCallback, type ReactNode } from 'react'
-import type { NotesContextType } from '@/types'
+import type { NotesContextType, Note } from '@/types'
 import { useNotesStorage } from '@/hooks/useNotesStorage'
 import { useCategoriesStorage } from '@/hooks/useCategoriesStorage'
 import { useSelection } from '@/hooks/useSelection'
 import { useNotesFilter } from '@/hooks/useNotesFilter'
+import { useToast } from './ToastContext'
 
 const NotesContext = createContext<NotesContextType | null>(null)
 
@@ -12,6 +13,8 @@ interface NotesProviderProps {
 }
 
 export function NotesProvider({ children }: NotesProviderProps) {
+    const { showToast } = useToast()
+
     // Hooks de almacenamiento
     const notesStorage = useNotesStorage()
     const categoriesStorage = useCategoriesStorage()
@@ -21,6 +24,35 @@ export function NotesProvider({ children }: NotesProviderProps) {
 
     // Hook de filtrado (depende de las notas)
     const filter = useNotesFilter({ notes: notesStorage.notes })
+
+    // Wrappers con toasts para acciones de notas
+    const addNote = useCallback((note: Omit<Note, 'id' | 'createdAt' | 'updatedAt'>) => {
+        notesStorage.addNote(note)
+        showToast('Nota creada', 'success')
+    }, [notesStorage, showToast])
+
+    const updateNote = useCallback((id: string, updates: Partial<Note>) => {
+        notesStorage.updateNote(id, updates)
+        showToast('Nota actualizada', 'success')
+    }, [notesStorage, showToast])
+
+    const deleteNote = useCallback((id: string) => {
+        notesStorage.deleteNote(id)
+        showToast('Nota eliminada', 'success')
+    }, [notesStorage, showToast])
+
+    const deleteMultiple = useCallback((ids: string[]) => {
+        notesStorage.deleteMultiple(ids)
+        showToast(`${ids.length} nota${ids.length === 1 ? '' : 's'} eliminada${ids.length === 1 ? '' : 's'}`, 'success')
+    }, [notesStorage, showToast])
+
+    const toggleFavorite = useCallback((id: string) => {
+        const note = notesStorage.notes.find(n => n.id === id)
+        notesStorage.toggleFavorite(id)
+        if (note) {
+            showToast(note.isFavorite ? 'Quitada de favoritos' : 'Añadida a favoritos', 'info')
+        }
+    }, [notesStorage, showToast])
 
     // Limpiar categoría activa si se elimina la categoría
     const deleteCategory = useCallback((id: string) => {
@@ -87,12 +119,12 @@ export function NotesProvider({ children }: NotesProviderProps) {
         showOnlyFavorites: filter.showOnlyFavorites,
         filteredNotes: filter.filteredNotes,
 
-        // Acciones notas
-        addNote: notesStorage.addNote,
-        updateNote: notesStorage.updateNote,
-        deleteNote: notesStorage.deleteNote,
-        deleteMultiple: notesStorage.deleteMultiple,
-        toggleFavorite: notesStorage.toggleFavorite,
+        // Acciones notas (con toasts)
+        addNote,
+        updateNote,
+        deleteNote,
+        deleteMultiple,
+        toggleFavorite,
 
         // Acciones categorías
         addCategory: categoriesStorage.addCategory,

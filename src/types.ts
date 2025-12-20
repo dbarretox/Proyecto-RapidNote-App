@@ -79,3 +79,19 @@ export interface NotesContextType {
     setActiveCategory: (categoryId: string | null) => void
     setShowOnlyFavorites: (show: boolean) => void
 }
+
+// Tipos para el sistema de Toasts
+export type ToastType = 'success' | 'error' | 'info' | 'warning'
+
+export interface Toast {
+    id: string
+    message: string
+    type: ToastType
+    duration?: number
+}
+
+export interface ToastContextType {
+    toasts: Toast[]
+    showToast: (message: string, type?: ToastType, duration?: number) => void
+    dismissToast: (id: string) => void
+}

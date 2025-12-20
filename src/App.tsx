@@ -4,11 +4,11 @@ import { NoteList, NoteForm } from "@/components/notes"
 import { SearchBar, SortControls } from "@/components/controls"
 import { motion } from "framer-motion"
 import { Star, Search, Edit3, FileText, Tag } from "lucide-react"
-import { Button, ConfirmDialog } from "@/components/ui"
+import { Button, ConfirmDialog, ToastContainer } from "@/components/ui"
 import { Header, BottomNav } from "@/components/layout"
 import { CategorySelector, CategoryForm, CategoryList } from "@/components/categories"
 import { UpdatePrompt } from "@/components/pwa"
-import { NotesProvider, useNotes } from "@/contexts"
+import { NotesProvider, ToastProvider, useNotes } from "@/contexts"
 
 function AppContent() {
   const {
@@ -303,15 +303,18 @@ function AppContent() {
       />
 
       <UpdatePrompt />
+      <ToastContainer />
     </div>
   )
 }
 
 function App() {
   return (
-    <NotesProvider>
-      <AppContent />
-    </NotesProvider>
+    <ToastProvider>
+      <NotesProvider>
+        <AppContent />
+      </NotesProvider>
+    </ToastProvider>
   )
 }
 
