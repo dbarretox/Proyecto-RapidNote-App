@@ -46,7 +46,7 @@ export function NotesProvider({ children }: NotesProviderProps) {
         deletedNotesRef.current = [noteToDelete]
         notesStorage.deleteNote(id)
 
-        showToast('Nota eliminada', 'success', UNDO_DURATION, {
+        showToast('Nota eliminada', 'error', UNDO_DURATION, {
             label: 'Deshacer',
             onClick: () => {
                 notesStorage.restoreNotes(deletedNotesRef.current)
@@ -65,7 +65,7 @@ export function NotesProvider({ children }: NotesProviderProps) {
         const count = notesToDelete.length
         showToast(
             `${count} nota${count === 1 ? '' : 's'} eliminada${count === 1 ? '' : 's'}`,
-            'success',
+            'error',
             UNDO_DURATION,
             {
                 label: 'Deshacer',
