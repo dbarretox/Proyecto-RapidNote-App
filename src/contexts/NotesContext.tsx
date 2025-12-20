@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useCallback, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useCallback, useRef, type ReactNode } from 'react'
 import type { NotesContextType, Note } from '@/types'
 import { useNotesStorage } from '@/hooks/useNotesStorage'
 import { useCategoriesStorage } from '@/hooks/useCategoriesStorage'
@@ -8,12 +8,15 @@ import { useToast } from './ToastContext'
 
 const NotesContext = createContext<NotesContextType | null>(null)
 
+const UNDO_DURATION = 5000
+
 interface NotesProviderProps {
     children: ReactNode
 }
 
 export function NotesProvider({ children }: NotesProviderProps) {
     const { showToast } = useToast()
+    const deletedNotesRef = useRef<Note[]>([])
 
     // Hooks de almacenamiento
     const notesStorage = useNotesStorage()
@@ -37,13 +40,41 @@ export function NotesProvider({ children }: NotesProviderProps) {
     }, [notesStorage, showToast])
 
     const deleteNote = useCallback((id: string) => {
+        const noteToDelete = notesStorage.notes.find(n => n.id === id)
+        if (!noteToDelete) return
+
+        deletedNotesRef.current = [noteToDelete]
         notesStorage.deleteNote(id)
-        showToast('Nota eliminada', 'success')
+
+        showToast('Nota eliminada', 'success', UNDO_DURATION, {
+            label: 'Deshacer',
+            onClick: () => {
+                notesStorage.restoreNotes(deletedNotesRef.current)
+                showToast('Nota restaurada', 'success')
+            }
+        })
     }, [notesStorage, showToast])
 
     const deleteMultiple = useCallback((ids: string[]) => {
+        const notesToDelete = notesStorage.notes.filter(n => ids.includes(n.id))
+        if (notesToDelete.length === 0) return
+
+        deletedNotesRef.current = notesToDelete
         notesStorage.deleteMultiple(ids)
-        showToast(`${ids.length} nota${ids.length === 1 ? '' : 's'} eliminada${ids.length === 1 ? '' : 's'}`, 'success')
+
+        const count = notesToDelete.length
+        showToast(
+            `${count} nota${count === 1 ? '' : 's'} eliminada${count === 1 ? '' : 's'}`,
+            'success',
+            UNDO_DURATION,
+            {
+                label: 'Deshacer',
+                onClick: () => {
+                    notesStorage.restoreNotes(deletedNotesRef.current)
+                    showToast(`${count} nota${count === 1 ? '' : 's'} restaurada${count === 1 ? '' : 's'}`, 'success')
+                }
+            }
+        )
     }, [notesStorage, showToast])
 
     const toggleFavorite = useCallback((id: string) => {

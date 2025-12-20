@@ -14,6 +14,7 @@ export function ToastContainer() {
                             message={toast.message}
                             type={toast.type}
                             onDismiss={() => dismissToast(toast.id)}
+                            action={toast.action}
                         />
                     </div>
                 ))}

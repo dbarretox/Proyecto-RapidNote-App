@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect, useRef, type ReactNode } from 'react'
-import type { Toast, ToastType, ToastContextType } from '@/types'
+import type { Toast, ToastType, ToastAction, ToastContextType } from '@/types'
 
 const ToastContext = createContext<ToastContextType | null>(null)
 
@@ -25,9 +25,9 @@ export function ToastProvider({ children }: ToastProviderProps) {
         setToasts(prev => prev.filter(toast => toast.id !== id))
     }, [])
 
-    const showToast = useCallback((message: string, type: ToastType = 'info', duration: number = DEFAULT_DURATION) => {
+    const showToast = useCallback((message: string, type: ToastType = 'info', duration: number = DEFAULT_DURATION, action?: ToastAction) => {
         const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-        const newToast: Toast = { id, message, type, duration }
+        const newToast: Toast = { id, message, type, duration, action }
 
         setToasts(prev => {
             // Si hay más de MAX_TOASTS, eliminar los más viejos

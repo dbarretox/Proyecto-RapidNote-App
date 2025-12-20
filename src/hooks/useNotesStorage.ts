@@ -69,6 +69,10 @@ export function useNotesStorage() {
         ))
     }, [])
 
+    const restoreNotes = useCallback((notesToRestore: Note[]) => {
+        setNotes(prev => [...notesToRestore, ...prev])
+    }, [])
+
     return {
         notes,
         isReady,
@@ -76,6 +80,7 @@ export function useNotesStorage() {
         updateNote,
         deleteNote,
         deleteMultiple,
-        toggleFavorite
+        toggleFavorite,
+        restoreNotes
     }
 }
