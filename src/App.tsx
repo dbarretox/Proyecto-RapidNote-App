@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react"
-import type { Note, SelectionMode, Category } from "@/types"
+import { useState } from "react"
+import type { Note, Category, ActiveTab } from "@/types"
 import { NoteList, NoteForm } from "@/components/notes"
 import { SearchBar, SortControls } from "@/components/controls"
 import { motion } from "framer-motion"
@@ -7,119 +7,62 @@ import { Star, Search, Edit3, FileText, Tag } from "lucide-react"
 import { Button, ConfirmDialog } from "@/components/ui"
 import { Header, BottomNav } from "@/components/layout"
 import { CategorySelector, CategoryForm, CategoryList } from "@/components/categories"
+import { UpdatePrompt } from "@/components/pwa"
+import { NotesProvider, useNotes } from "@/contexts"
 
+function AppContent() {
+  const {
+    notes,
+    categories,
+    filteredNotes,
+    selectedIds,
+    isSelectionMode,
+    searchQuery,
+    sortBy,
+    sortOrder,
+    activeCategory,
+    showOnlyFavorites,
+    addNote,
+    updateNote,
+    deleteNote,
+    deleteMultiple,
+    toggleFavorite,
+    addCategory,
+    updateCategory,
+    deleteCategory,
+    toggleSelection,
+    selectAll,
+    exitSelectionMode,
+    enterSelectionMode,
+    setSearchQuery,
+    setSortBy,
+    setSortOrder,
+    setActiveCategory,
+    setShowOnlyFavorites
+  } = useNotes()
 
-function App() {
-
-  // Estados de la aplicación
-  const [activeTab, setActiveTab] = useState<'notes' | 'search' | 'add' | 'categories'>('notes')
-  const [notes, setNotes] = useState<Note[]>([])
+  // Estado local de UI
+  const [activeTab, setActiveTab] = useState<ActiveTab>('notes')
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [isReady, setIsReady] = useState(false)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [sortBy, setSortBy] = useState<"date" | "favorite" | "updated">("date")
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
-  const [showOnlyFavorites, setShowOnlyFavorites] = useState(false)
-  const [categories, setCategories] = useState<Category[]>([])
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null)
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null)
   const [showCategoryForm, setShowCategoryForm] = useState(false)
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
-  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null)
   const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false)
 
-  // Estado para selección múltiple
-  const [selectionMode, setSelectionMode] = useState<SelectionMode>({
-    isActive: false,
-    selectedIds: new Set()
-  })
+  // Crear SelectionMode compatible con componentes existentes
+  const selectionMode = { isActive: isSelectionMode, selectedIds }
 
-  // Maneja la persistencia de datos de la aplicacion (notas y configuracion)
-  useEffect(() => {
-    const storedNotes = localStorage.getItem("notes")
-    if (storedNotes) {
-      try {
-        const parsed = JSON.parse(storedNotes)
-        const migratedNotes = Array.isArray(parsed) ? parsed.map(note => ({
-          ...note,
-          createdAt: note.createdAt || parseInt(note.id),
-          updatedAt: note.updatedAt || parseInt(note.id)
-        })) : []
-        setNotes(migratedNotes)
-      } catch {
-        console.error("Error al parsear notes desde localStorage")
-      }
-    }
-
-    const storedCategories = localStorage.getItem("categories")
-    if (storedCategories) {
-      try {
-        const parsed = JSON.parse(storedCategories)
-        setCategories(Array.isArray(parsed) ? parsed : [])
-      } catch {
-        console.error("Error al parsear categories desde localStorage")
-      }
-    }
-
-    const storedSelectedCategory = localStorage.getItem("selectedCategoryId")
-    if (storedSelectedCategory && storedSelectedCategory !== "null") {
-      setSelectedCategoryId(storedSelectedCategory)
-    }
-
-    const storedShowFavs = localStorage.getItem("showOnlyFavorites")
-    if (storedShowFavs === "true") {
-      setShowOnlyFavorites(true)
-    }
-
-    setIsReady(true)
-  }, [])
-
-  // Guarda las notas en localStorage
-  useEffect(() => {
-    if (isReady) {
-      localStorage.setItem("notes", JSON.stringify(notes))
-    }
-  }, [notes, isReady])
-
-  useEffect(() => {
-    localStorage.setItem("showOnlyFavorites", String(showOnlyFavorites))
-  }, [showOnlyFavorites])
-
-  useEffect(() => {
-    if (isReady) {
-      localStorage.setItem("categories", JSON.stringify(categories))
-    }
-  }, [categories, isReady])
-
-  useEffect(() => {
-    localStorage.setItem("selectedCategoryId", selectedCategoryId || "null")
-  }, [selectedCategoryId])
-
-  // Funciones de notas (guardar y editar)
+  // Handlers de notas
   const handleSaveNote = () => {
     if (!title.trim() && !content.trim()) return
 
-    const now = Date.now()
-    const categoryToSave = editingCategoryId
-
     if (editingId) {
-      setNotes(notes.map(note =>
-        note.id === editingId ? { ...note, title, content, categoryId: categoryToSave, updatedAt: now } : note
-      ))
+      updateNote(editingId, { title, content, categoryId: editingCategoryId })
       setEditingId(null)
-      setEditingCategoryId(null)
     } else {
-      const newNote: Note = {
-        id: now.toString(),
-        title,
-        content,
-        categoryId: categoryToSave,
-        isFavorite: false,
-        createdAt: now,
-        updatedAt: now
-      }
-      setNotes([newNote, ...notes])
+      addNote({ title, content, categoryId: editingCategoryId, isFavorite: false })
     }
 
     setTitle("")
@@ -128,16 +71,11 @@ function App() {
     setActiveTab('notes')
   }
 
-  const deleteNote = (id: string) => {
-    setNotes(notes.filter(note => note.id !== id))
-  }
-
   const startEdit = (note: Note) => {
-    if (selectionMode.isActive) {
-      toggleNoteSelection(note.id)
+    if (isSelectionMode) {
+      toggleSelection(note.id)
       return
     }
-
     setEditingId(note.id)
     setTitle(note.title)
     setContent(note.content)
@@ -145,124 +83,23 @@ function App() {
     setActiveTab('add')
   }
 
-  const toggleFavorite = (id: string) => {
-    setNotes(notes.map(note =>
-      note.id === id ? { ...note, isFavorite: !note.isFavorite, updatedAt: Date.now() } : note
-    ))
-  }
+  const handleDeleteSelected = () => setShowDeleteAllConfirm(true)
 
-  const initializeNewNote = () => {
-    setEditingCategoryId(selectedCategoryId)
-  }
-
-  // Funciones de selección múltiple
-  const toggleSelectionMode = () => {
-    setSelectionMode({
-      isActive: !selectionMode.isActive,
-      selectedIds: new Set()
-    })
-  }
-
-  const toggleNoteSelection = (id: string) => {
-    const newSelectedIds = new Set(selectionMode.selectedIds)
-    if (newSelectedIds.has(id)) {
-      newSelectedIds.delete(id)
-    } else {
-      newSelectedIds.add(id)
-    }
-    setSelectionMode({ ...selectionMode, selectedIds: newSelectedIds })
-  }
-
-  const selectAllNotes = () => {
-    const currentNotesIds = sortedNotes.map(note => note.id)
-
-    if (selectionMode.selectedIds.size === currentNotesIds.length) {
-      // Deseleccionar todas
-      setSelectionMode({ ...selectionMode, selectedIds: new Set() })
-    } else {
-      // Seleccionar todas
-      setSelectionMode({ ...selectionMode, selectedIds: new Set(currentNotesIds) })
-    }
-  }
-
-  const deleteSelectedNotes = () => {
-    setShowDeleteAllConfirm(true)
-  }
-
-  const confirmDeleteSelectedNotes = () => {
-    const idsToDelete = Array.from(selectionMode.selectedIds)
-    setNotes(notes.filter(note => !idsToDelete.includes(note.id)))
-    setSelectionMode({ isActive: false, selectedIds: new Set() })
+  const confirmDeleteSelected = () => {
+    deleteMultiple(Array.from(selectedIds))
+    exitSelectionMode()
     setShowDeleteAllConfirm(false)
   }
 
-  const cancelSelection = () => {
-    setSelectionMode({ isActive: false, selectedIds: new Set() })
-  }
-
-  // Filtrar y ordenar notas
-  const filteredNotes = notes.filter(note => {
-    const matchesSearch =
-      note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      note.content.toLowerCase().includes(searchTerm.toLowerCase())
-
-    const matchesCategory = selectedCategoryId
-      ? note.categoryId === selectedCategoryId
-      : true
-
-    const matchesFavorites = showOnlyFavorites ? note.isFavorite : true
-
-    return matchesSearch && matchesCategory && matchesFavorites
-  })
-
-  const sortedNotes = [...filteredNotes].sort((a, b) => {
-    if (sortBy === "favorite") {
-      return sortOrder === "asc"
-        ? Number(a.isFavorite) - Number(b.isFavorite)
-        : Number(b.isFavorite) - Number(a.isFavorite)
-    }
-
-    if (sortBy === "updated") {
-      const dateA = a.updatedAt || a.createdAt || parseInt(a.id)
-      const dateB = b.updatedAt || b.createdAt || parseInt(b.id)
-      return sortOrder === "asc" ? dateA - dateB : dateB - dateA
-    }
-
-    // Default: ordenar por fecha de creación
-    const dateA = a.createdAt || parseInt(a.id)
-    const dateB = b.createdAt || parseInt(b.id)
-    return sortOrder === "asc" ? dateA - dateB : dateB - dateA
-  })
-
-  // Funciones de categorías
-  const handleSaveCategory = (categoryData: Omit<Category, 'id' | 'createdAt'>) => {
-    const now = Date.now()
-
+  // Handlers de categorías
+  const handleSaveCategory = (data: Omit<Category, 'id' | 'createdAt'>) => {
     if (editingCategory) {
-      setCategories(categories.map(cat =>
-        cat.id === editingCategory.id
-          ? { ...cat, ...categoryData }
-          : cat
-      ))
+      updateCategory(editingCategory.id, data)
       setEditingCategory(null)
     } else {
-      const newCategory: Category = {
-        id: now.toString(),
-        ...categoryData,
-        createdAt: now
-      }
-      setCategories([...categories, newCategory])
+      addCategory(data)
     }
-
     setShowCategoryForm(false)
-  }
-
-  const deleteCategory = (categoryId: string) => {
-    setCategories(categories.filter(cat => cat.id !== categoryId))
-
-    if (selectedCategoryId === categoryId) {
-      setSelectedCategoryId(null)
-    }
   }
 
   const startEditCategory = (category: Category) => {
@@ -270,145 +107,72 @@ function App() {
     setShowCategoryForm(true)
   }
 
-  // Manejo de long press
-  useEffect(() => {
-    let pressTimer: ReturnType<typeof setTimeout>
-    let targetNoteId: string | null = null
-
-    const handleTouchStart = (e: TouchEvent) => {
-      if (selectionMode.isActive) return
-
-      const target = e.target as HTMLElement
-      if (target.closest('button') || target.closest('[role="button"]')) return
-
-      const noteCard = target.closest('.note-card-container')
-      if (noteCard) {
-        targetNoteId = noteCard.getAttribute('data-note-id')
-        if (targetNoteId) {
-          pressTimer = setTimeout(() => {
-            navigator.vibrate?.(50)
-            setSelectionMode({
-              isActive: true,
-              selectedIds: new Set([targetNoteId!])
-            })
-          }, 800)
-        }
-      }
+  // Handler para toggle de modo selección desde header
+  const handleToggleSelectionMode = () => {
+    if (isSelectionMode) {
+      exitSelectionMode()
+    } else {
+      enterSelectionMode()
     }
-
-    const handleTouchEnd = () => {
-      clearTimeout(pressTimer)
-      targetNoteId = null
-    }
-
-    document.addEventListener('touchstart', handleTouchStart)
-    document.addEventListener('touchend', handleTouchEnd)
-    document.addEventListener('touchmove', handleTouchEnd)
-
-    return () => {
-      clearTimeout(pressTimer)
-      document.removeEventListener('touchstart', handleTouchStart)
-      document.removeEventListener('touchend', handleTouchEnd)
-      document.removeEventListener('touchmove', handleTouchEnd)
-    }
-  }, [selectionMode.isActive])
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Header */}
       <Header
         notes={notes}
         selectionMode={selectionMode}
         activeTab={activeTab}
-        onToggleSelection={toggleSelectionMode}
-        onCancelSelection={cancelSelection}
+        onToggleSelection={handleToggleSelectionMode}
+        onCancelSelection={exitSelectionMode}
       />
 
-      {/* Contenido principal */}
       <div className="flex-1 p-4 pb-32">
         <div className="max-w-lg mx-auto">
-          {/* Tab: Lista de notas */}
           {activeTab === 'notes' && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              {!selectionMode.isActive && (
-                <div className="space-y-4 mb-4">  
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+              {!isSelectionMode && (
+                <div className="space-y-4 mb-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center bg-gray-100 rounded-lg p-1">
-                      <Button
-                        variant="tab"
-                        isActive={!showOnlyFavorites}
-                        onClick={() => setShowOnlyFavorites(false)}
-                        className="text-sm"
-                      >
-                        <FileText className="w-4 h-4" />
-                        <span>Todas</span>
+                      <Button variant="tab" isActive={!showOnlyFavorites} onClick={() => setShowOnlyFavorites(false)} className="text-sm">
+                        <FileText className="w-4 h-4" /><span>Todas</span>
                       </Button>
-
-                      <Button
-                        variant="tab"
-                        isActive={showOnlyFavorites}
-                        onClick={() => setShowOnlyFavorites(true)}
-                        className="text-sm"
-                      >
-                        <Star className={`w-4 h-4 ${showOnlyFavorites ? 'fill-current' : ''}`} />
-                        <span>Favoritas</span>
+                      <Button variant="tab" isActive={showOnlyFavorites} onClick={() => setShowOnlyFavorites(true)} className="text-sm">
+                        <Star className={`w-4 h-4 ${showOnlyFavorites ? 'fill-current' : ''}`} /><span>Favoritas</span>
                       </Button>
                     </div>
-
-                    <SortControls
-                      sortBy={sortBy}
-                      setSortBy={setSortBy}
-                      sortOrder={sortOrder}
-                      setSortOrder={setSortOrder}
-                    />
+                    <SortControls sortBy={sortBy} setSortBy={setSortBy} sortOrder={sortOrder} setSortOrder={setSortOrder} />
                   </div>
-
-                  <CategorySelector
-                    categories={categories}
-                    selectedCategoryId={selectedCategoryId}
-                    onCategorySelect={setSelectedCategoryId}
-                  />
+                  <CategorySelector categories={categories} selectedCategoryId={activeCategory} onCategorySelect={setActiveCategory} />
                 </div>
               )}
 
               <NoteList
-                notes={sortedNotes}
+                notes={filteredNotes}
                 totalNotes={notes.length}
-                searchTerm={searchTerm}
+                searchTerm={searchQuery}
                 categories={categories}
                 onDelete={deleteNote}
                 onEdit={startEdit}
                 onToggleFavorite={toggleFavorite}
                 selectionMode={selectionMode}
-                onToggleSelection={toggleNoteSelection}
-                onDeleteSelected={deleteSelectedNotes}
-                onCancelSelection={cancelSelection}
-                onSelectAll={selectAllNotes}
+                onToggleSelection={toggleSelection}
+                onDeleteSelected={handleDeleteSelected}
+                onCancelSelection={exitSelectionMode}
+                onSelectAll={() => selectAll(filteredNotes.map(n => n.id))}
               />
 
               {notes.length === 0 && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="text-center py-12"
-                >
+                <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-12">
                   <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Edit3 className="w-8 h-8 text-gray-400" />
                   </div>
                   <h3 className="text-lg font-medium text-gray-900 mb-2">Sin notas aún</h3>
                   <p className="text-gray-500 mb-6">Crea tu primera nota tocando el botón +</p>
                   <motion.button
-                    onClick={() => {
-                      setEditingCategoryId(selectedCategoryId)
-                      setActiveTab('add')
-                    }}
+                    onClick={() => { setEditingCategoryId(activeCategory); setActiveTab('add') }}
                     className="px-6 py-3 bg-blue-600 text-white rounded-xl font-medium shadow-lg"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                   >
                     Crear nota
                   </motion.button>
@@ -417,30 +181,24 @@ function App() {
             </motion.div>
           )}
 
-          {/* Tab: Búsqueda */}
           {activeTab === 'search' && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+              <SearchBar searchTerm={searchQuery} setSearchTerm={setSearchQuery} />
               <div className="mt-6">
-                {searchTerm ? (
+                {searchQuery ? (
                   <NoteList
-                    notes={sortedNotes}
+                    notes={filteredNotes}
                     totalNotes={notes.length}
-                    searchTerm={searchTerm}
+                    searchTerm={searchQuery}
                     categories={categories}
                     onDelete={deleteNote}
                     onEdit={startEdit}
                     onToggleFavorite={toggleFavorite}
                     selectionMode={selectionMode}
-                    onToggleSelection={toggleNoteSelection}
-                    onDeleteSelected={deleteSelectedNotes}
-                    onCancelSelection={cancelSelection}
-                    onSelectAll={selectAllNotes}
+                    onToggleSelection={toggleSelection}
+                    onDeleteSelected={handleDeleteSelected}
+                    onCancelSelection={exitSelectionMode}
+                    onSelectAll={() => selectAll(filteredNotes.map(n => n.id))}
                   />
                 ) : (
                   <div className="text-center py-12">
@@ -452,19 +210,11 @@ function App() {
             </motion.div>
           )}
 
-          {/* Tab: Agregar/Editar nota */}
           {activeTab === 'add' && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
               <div className="mb-4">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  {editingId ? 'Editar nota' : 'Nueva nota'}
-                </h2>
+                <h2 className="text-xl font-semibold text-gray-900">{editingId ? 'Editar nota' : 'Nueva nota'}</h2>
               </div>
-
               <NoteForm
                 title={title}
                 content={content}
@@ -476,16 +226,9 @@ function App() {
                 onCategoryChange={setEditingCategoryId}
                 onSave={handleSaveNote}
               />
-
               {editingId && (
                 <motion.button
-                  onClick={() => {
-                    setEditingId(null)
-                    setTitle("")
-                    setContent("")
-                    setEditingCategoryId(null)
-                    setActiveTab('notes')
-                  }}
+                  onClick={() => { setEditingId(null); setTitle(""); setContent(""); setEditingCategoryId(null); setActiveTab('notes') }}
                   className="mt-4 w-full py-3 text-gray-600 text-center font-medium"
                   whileTap={{ scale: 0.98 }}
                 >
@@ -495,22 +238,14 @@ function App() {
             </motion.div>
           )}
 
-          {/* Tab: Gestión de categorías */}
           {activeTab === 'categories' && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  Categorías
-                </h2>
+                <h2 className="text-xl font-semibold text-gray-900">Categorías</h2>
                 <motion.button
                   onClick={() => setShowCategoryForm(true)}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                 >
                   + Nueva
                 </motion.button>
@@ -519,27 +254,14 @@ function App() {
                 <div className="mb-6">
                   <CategoryForm
                     onSave={handleSaveCategory}
-                    onCancel={() => {
-                      setShowCategoryForm(false)
-                      setEditingCategory(null)
-                    }}
+                    onCancel={() => { setShowCategoryForm(false); setEditingCategory(null) }}
                     editingCategory={editingCategory}
                   />
                 </div>
               )}
-
-              <CategoryList
-                categories={categories}
-                onEdit={startEditCategory}
-                onDelete={deleteCategory}
-              />
-
+              <CategoryList categories={categories} onEdit={startEditCategory} onDelete={deleteCategory} />
               {categories.length === 0 && !showCategoryForm && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="text-center py-12"
-                >
+                <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-12">
                   <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Tag className="w-8 h-8 text-gray-400" />
                   </div>
@@ -548,8 +270,7 @@ function App() {
                   <motion.button
                     onClick={() => setShowCategoryForm(true)}
                     className="px-6 py-3 bg-blue-600 text-white rounded-xl font-medium shadow-lg"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                   >
                     Crear categoría
                   </motion.button>
@@ -560,34 +281,37 @@ function App() {
         </div>
       </div>
 
-      {/* Bottom Navigation */}
       <BottomNav
         activeTab={activeTab}
         editingId={editingId}
         selectionMode={selectionMode}
         onTabChange={setActiveTab}
-        onCancelEdit={() => {
-          setEditingId(null)
-          setTitle("")
-          setContent("")
-          setEditingCategoryId(null)
-        }}
-        onCancelSelection={cancelSelection}
-        onInitializeNewNote={initializeNewNote}
+        onCancelEdit={() => { setEditingId(null); setTitle(""); setContent(""); setEditingCategoryId(null) }}
+        onCancelSelection={exitSelectionMode}
+        onInitializeNewNote={() => setEditingCategoryId(activeCategory)}
       />
 
-      {/* Modal de confirmacion para eliminacion masiva */}
       <ConfirmDialog
         isOpen={showDeleteAllConfirm}
         title="Eliminar notas seleccionadas"
-        message={`¿Estás seguro de que quieres eliminar ${selectionMode.selectedIds.size} nota${selectionMode.selectedIds.size === 1 ? '' : 's'}? Esta acción no se puede deshacer.`}
+        message={`¿Estás seguro de que quieres eliminar ${selectedIds.size} nota${selectedIds.size === 1 ? '' : 's'}? Esta acción no se puede deshacer.`}
         confirmText="Eliminar todas"
         cancelText="Cancelar"
         variant="danger"
-        onConfirm={confirmDeleteSelectedNotes}
+        onConfirm={confirmDeleteSelected}
         onCancel={() => setShowDeleteAllConfirm(false)}
       />
+
+      <UpdatePrompt />
     </div>
+  )
+}
+
+function App() {
+  return (
+    <NotesProvider>
+      <AppContent />
+    </NotesProvider>
   )
 }
 
